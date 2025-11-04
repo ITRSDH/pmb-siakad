@@ -1,66 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# PMB-SIAKAD — Panduan Instalasi Laravel (Windows / Laragon)
 
-## About Laravel
+Dokumentasi singkat untuk mengatur dan menjalankan project Laravel ini pada lingkungan Windows, khususnya dengan Laragon. Panduan ini dibuat untuk pengembang pemula hingga menengah.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Prasyarat
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Windows (10/11)
+- Laragon (direkomendasikan) atau PHP >= 8.1, Composer, MySQL/MariaDB
+- Git
+- Node.js & npm (untuk kompilasi asset)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Jika menggunakan Laragon, banyak dependensi akan tersedia secara otomatis.
 
-## Learning Laravel
+## Langkah cepat — Buat project baru (opsional)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Jika Anda ingin membuat project Laravel baru (bukan dari repo ini), gunakan Composer:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```powershell
+# Dengan Composer
+composer create-project laravel/laravel nama-project
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# Atau jika Anda memiliki Laravel installer
+laravel new nama-project
+```
 
-## Laravel Sponsors
+Untuk repo ini: cukup clone atau letakkan folder di Laragon `www` lalu lanjut ke konfigurasi.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 1) Mengatur environment (.env)
 
-### Premium Partners
+Salin file `.env.example` menjadi `.env` (jika belum ada):
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```powershell
+cd C:\laragon\www\persiapan-presentasi\pmb-siakad - Copy
+if (-Not (Test-Path .env)) { Copy-Item .env.example .env }
+```
 
-## Contributing
+Edit `.env` sesuai konfigurasi lokal Anda (database, mail, dll). Contoh bagian database:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Code of Conduct
+Jika Anda menggunakan Laragon, Anda dapat membuat database lewat Menu > Database > Adminer / phpMyAdmin, atau terminal MySQL.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 2) Install dependency PHP (Composer)
 
-## Security Vulnerabilities
+Jalankan di PowerShell pada root project:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+composer install
+```
 
-## License
+Jika composer menanyakan credential atau GIT, pastikan koneksi internet dan akses ke packagist/github bekerja.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 3) Generate application key
+
+```powershell
+php artisan key:generate
+```
+
+Perintah ini akan mengisi `APP_KEY` di `.env`.
+
+## 4) Migrasi dan seeding database
+
+Jalankan migrasi (dan seeding jika ada):
+
+```powershell
+php artisan migrate
+# Jika ingin menjalankan seeder
+php artisan db:seed
+```
+
+Catatan: Jika Anda menggunakan MySQL baru, pastikan `DB_DATABASE` sudah dibuat.
+
+## 5) Install & build frontend (opsional)
+
+Instal Node deps dan build assets:
+
+```powershell
+npm install
+# Dev build (watch)
+npm run dev
+# Or production build
+npm run build
+```
+
+Jika menggunakan Laragon + hot reload, Anda bisa menjalankan `npm run dev` dan mengakses app via Laragon domain.
+
+## 6) Jalankan server lokal
+
+Anda punya beberapa opsi:
+
+- Gunakan built-in server Laravel (development):
+
+```powershell
+php artisan serve --host=127.0.0.1 --port=8000
+# lalu akses http://127.0.0.1:8000
+```
+
+- Atau gunakan Laragon: letakkan repo di folder `www`, lalu aktifkan Apache/Nginx melalui Laragon dan buka domain yang telah dibuat.
+
+## 7) Konfigurasi tambahan untuk Laragon (opsional)
+
+Jika menggunakan Laragon, Anda dapat membuat virtual host otomatis: klik kanan Laragon → Quick app → New → Isikan folder project. Atau gunakan menu `www` dan `restart` untuk mendeteksi.
+
+## 8) Menjalankan test (jika ada)
+
+Jika project memiliki test PHPUnit, jalankan:
+
+```powershell
+./vendor/bin/phpunit
+```
+
+Atau via artisan (Laravel 9+):
+
+```powershell
+php artisan test
+```
+
+## Troubleshooting umum
+
+- 500 / error koneksi DB: periksa `DB_*` di `.env` dan pastikan database sudah dibuat.
+- Permission file: di Windows biasanya bukan masalah, tapi pastikan storage dan bootstrap/cache dapat ditulis oleh user.
+- Dependensi tidak terinstall: jalankan `composer install` dan `npm install` lagi, periksa versi PHP.
+
+## Tips
+
+- Gunakan Git untuk versi kontrol. Contoh setting remote dan push:
+
+```powershell
+git remote -v
+git push origin main
+```
+
+- Untuk mempermudah workflow di mesin pengembangan, gunakan SSH key untuk akses GitHub.
+
+## Kontak / Sumber
+
+- Dokumentasi Laravel: https://laravel.com/docs
+- Laracasts (tutorial video): https://laracasts.com
+
+---
+
+Lisensi: sesuaikan dengan lisensi project (file LICENSE atau keputusan tim).
+
