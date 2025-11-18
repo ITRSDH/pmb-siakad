@@ -218,6 +218,95 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Syarat Dokumen Section -->
+                @if($periodePendaftaran->dokumenPendaftars->count() > 0)
+                <div class="separator-dashed"></div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="fw-bold text-uppercase text-muted">
+                                <i class="fas fa-file-alt text-primary me-2"></i>
+                                Syarat Dokumen Pendaftaran
+                            </label>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Nama Dokumen</th>
+                                            <th width="100" class="text-center">Tipe</th>
+                                            <th width="100" class="text-center">Status</th>
+                                            <th>Catatan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($periodePendaftaran->dokumenPendaftars as $dokumen)
+                                        <tr>
+                                            <td>
+                                                <i class="fas fa-file-alt text-muted me-2"></i>
+                                                <strong>{{ $dokumen->nama_dokumen }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-{{ $dokumen->tipe_dokumen == 'wajib' ? 'danger' : 'info' }} badge-sm">
+                                                    {{ ucfirst($dokumen->tipe_dokumen) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-{{ $dokumen->pivot->is_wajib ? 'warning' : 'secondary' }} badge-sm">
+                                                    {{ $dokumen->pivot->is_wajib ? 'Wajib' : 'Opsional' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($dokumen->pivot->catatan)
+                                                    <small class="text-muted">{{ $dokumen->pivot->catatan }}</small>
+                                                @else
+                                                    <small class="text-muted fst-italic">Tidak ada catatan</small>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge badge-warning me-2">Wajib</span>
+                                            <small class="text-muted">{{ $periodePendaftaran->dokumenPendaftars->where('pivot.is_wajib', true)->count() }} dokumen</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge badge-secondary me-2">Opsional</span>
+                                            <small class="text-muted">{{ $periodePendaftaran->dokumenPendaftars->where('pivot.is_wajib', false)->count() }} dokumen</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="separator-dashed"></div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="fw-bold text-uppercase text-muted">
+                                <i class="fas fa-file-alt text-primary me-2"></i>
+                                Syarat Dokumen Pendaftaran
+                            </label>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                Tidak ada syarat dokumen yang ditetapkan untuk periode pendaftaran ini.
+                                <a href="{{ route('periode-pendaftaran.edit', $periodePendaftaran) }}" class="alert-link">Tambahkan syarat dokumen</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
 
             <div class="card-action">

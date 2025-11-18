@@ -1,6 +1,18 @@
 @php
 	$googleUser = auth('google')->user();
 	$dashboardHref = Route::has('google.dashboard') ? route('google.dashboard') : (Route::has('pmb.dashboard') ? route('pmb.dashboard') : url('/'));
+	
+	// Cek status pembayaran mahasiswa
+	$sudahBayar = false;
+	if ($googleUser) {
+		$pendaftar = \App\Models\Pendaftar::where('google_user_id', $googleUser->id)->first();
+		if ($pendaftar) {
+			$sudahBayar = \App\Models\PendaftarPembayaran::where('pendaftar_id', $pendaftar->id)
+				->where('status', 'confirmed')
+				->exists();
+		}
+	}
+	
 	$navLinks = [
 		[
 			'label' => 'Dashboard',
@@ -13,22 +25,34 @@
 			'active' => request()->routeIs('pmb.pendaftaran.*'),
 		],
 		[
-			'label' => 'Riwayat',
-			// header can't assume a pendaftar instance; point to dashboard where biodata management is accessible
-			'href' => (Route::has('pmb.riwayat.index') ? route('pmb.riwayat.index') : '#'),
-			'active' => request()->routeIs('pmb.riwayat.*'),
-		],
-		[
 			'label' => 'Pembayaran',
 			'href' => (Route::has('pmb.pembayaran.index') ? route('pmb.pembayaran.index') : '#'),
 			'active' => request()->routeIs('pmb.pembayaran.*'),
 		],
+	];
+	
+	// Tambahkan menu Dokumen hanya jika sudah membayar
+	if ($sudahBayar) {
+		$navLinks[] = [
+			'label' => 'Dokumen',
+			'href' => (Route::has('pmb.dokumen.index') ? route('pmb.dokumen.index') : '#'),
+			'active' => request()->routeIs('pmb.dokumen.*'),
+		];
+	}
+	
+	$navLinks = array_merge($navLinks, [
 		[
 			'label' => 'Pengumuman',
 			'href' => (Route::has('pmb.pengumuman.index') ? route('pmb.pengumuman.index') : '#'),
 			'active' => request()->routeIs('pmb.pengumuman.*'),
 		],
-	];
+		[
+			'label' => 'Riwayat',
+			// header can't assume a pendaftar instance; point to dashboard where biodata management is accessible
+			'href' => (Route::has('pmb.riwayat.index') ? route('pmb.riwayat.index') : '#'),
+			'active' => request()->routeIs('pmb.riwayat.*'),
+		],
+	]);
 @endphp
 
 <nav class="bg-white/80 dark:bg-gray-800/90 backdrop-blur shadow-sm">

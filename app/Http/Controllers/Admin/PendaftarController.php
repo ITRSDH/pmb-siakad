@@ -9,28 +9,17 @@ use Illuminate\Http\Request;
 
 class PendaftarController extends Controller
 {
-    public function indexMenunggu(Request $request)
+    public function indexPembayaranMenunggu(Request $request)
     {
         $query = Pendaftar::select(['id', 'nomor_pendaftaran', 'nama_lengkap', 'email', 'periode_pendaftaran_id', 'status', 'created_at'])
             ->with(['periodePendaftaran:id,nama_periode,jalur_pendaftaran_id', 'periodePendaftaran.jalurPendaftaran:id,nama_jalur', 'payments:id,pendaftar_id,status,created_at'])
             ->where(function ($query) {
-                // Kasus 1: status != submitted dan pembayaran sudah confirmed atau rejected
-                $query->where(function ($q) {
-                    $q->where('status', '!=', 'submitted')
-                      ->whereHas('payments', function ($q2) {
-                          $q2->whereIn('status', ['confirmed', 'rejected', 'pending']);
-                      });
-                })
-                // Kasus 2: status submitted namun pembayaran belum confirmed atau belum ada pembayaran
-                ->orWhere(function ($q) {
-                    $q->where('status', 'submitted')
-                      ->where(function ($q2) {
-                          $q2->whereDoesntHave('payments')
-                             ->orWhereHas('payments', function ($q3) {
-                                 $q3->where('status', '!=', 'confirmed');
-                             });
-                      });
-                });
+                // Pendaftar yang tidak memiliki pembayaran sama sekali
+                $query->whereDoesntHave('payments')
+                    // Atau memiliki pembayaran tetapi statusnya bukan confirmed
+                    ->orWhereHas('payments', function ($q) {
+                        $q->where('status', '!=', 'confirmed');
+                    });
             });
 
         // Filter berdasarkan periode pendaftaran
@@ -45,14 +34,68 @@ class PendaftarController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.pendaftar.index_menunggu', compact('pendaftars', 'periodes'));
+        return view('admin.pendaftar.index_pembayaran_menunggu', compact('pendaftars', 'periodes'));
     }
 
-    public function indexDiterima(Request $request) 
+    public function indexDokumenMenunggu(Request $request)
+    {
+        $query = Pendaftar::select(['id', 'nomor_pendaftaran', 'nama_lengkap', 'email', 'periode_pendaftaran_id', 'status', 'created_at'])
+            ->with([
+                'periodePendaftaran:id,nama_periode,jalur_pendaftaran_id', 
+                'periodePendaftaran.jalurPendaftaran:id,nama_jalur',
+                'periodePendaftaran.dokumenPendaftars',
+                'documents.dokumenPendaftar',
+                'payments:id,pendaftar_id,status,created_at'
+            ])
+            ->whereHas('payments', function ($q) {
+                $q->where('status', 'confirmed');
+            })
+            ->where('status', '!=', 'submitted'); // Filter status selain submitted
+
+        // Filter berdasarkan periode pendaftaran
+        if ($request->filled('periode_id')) {
+            $query->where('periode_pendaftaran_id', $request->periode_id);
+        }
+
+        $pendaftars = $query->orderByDesc('created_at')->get();
+        
+        // Tambahkan informasi kelengkapan dokumen
+        $pendaftars = $pendaftars->map(function ($pendaftar) {
+            $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars;
+            $dokumenTerupload = $pendaftar->documents;
+            
+            $totalDokumen = $dokumenDiperlukan->count();
+            $dokumenLengkap = $dokumenTerupload->count();
+            $dokumenWajibDiperlukan = $dokumenDiperlukan->where('pivot.is_wajib', true)->count();
+            $dokumenWajibLengkap = $dokumenTerupload->whereIn('dokumen_pendaftar_id', 
+                $dokumenDiperlukan->where('pivot.is_wajib', true)->pluck('id'))->count();
+            
+            $pendaftar->kelengkapan_dokumen = [
+                'total_diperlukan' => $totalDokumen,
+                'total_terupload' => $dokumenLengkap,
+                'wajib_diperlukan' => $dokumenWajibDiperlukan,
+                'wajib_terupload' => $dokumenWajibLengkap,
+                'persentase' => $totalDokumen > 0 ? round(($dokumenLengkap / $totalDokumen) * 100) : 0,
+                'status_kelengkapan' => $dokumenWajibLengkap < $dokumenWajibDiperlukan ? 'belum_lengkap' : 'lengkap'
+            ];
+            
+            return $pendaftar;
+        });
+        
+        // Tidak ada filtering tambahan - tampilkan semua pendaftar dengan status != submitted
+        
+        // Ambil semua periode untuk dropdown filter
+        $periodes = PeriodePendaftaran::select('id', 'nama_periode')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('admin.pendaftar.index_dokumen_menunggu', compact('pendaftars', 'periodes'));
+    }
+
+    public function indexPembayaranDiterima(Request $request) 
     {
         $query = Pendaftar::select(['id', 'nomor_pendaftaran', 'nama_lengkap', 'email', 'periode_pendaftaran_id', 'status', 'created_at'])
             ->with(['periodePendaftaran:id,nama_periode,jalur_pendaftaran_id', 'periodePendaftaran.jalurPendaftaran:id,nama_jalur', 'payments:id,pendaftar_id,status,created_at'])
-            ->where('status', 'submitted')
             ->whereHas('payments', function ($q) {
                 $q->where('status', 'confirmed');
             });
@@ -69,20 +112,108 @@ class PendaftarController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.pendaftar.index_diterima', compact('pendaftars', 'periodes'));
+        return view('admin.pendaftar.index_pembayaran_diterima', compact('pendaftars', 'periodes'));
+    }
+
+    public function indexDokumenDiterima(Request $request)
+    {
+        $query = Pendaftar::select(['id', 'nomor_pendaftaran', 'nama_lengkap', 'email', 'periode_pendaftaran_id', 'status', 'created_at'])
+            ->with([
+                'periodePendaftaran:id,nama_periode,jalur_pendaftaran_id', 
+                'periodePendaftaran.jalurPendaftaran:id,nama_jalur',
+                'periodePendaftaran.dokumenPendaftars',
+                'documents.dokumenPendaftar',
+                'payments:id,pendaftar_id,status,created_at'
+            ])
+            ->whereHas('payments', function ($q) {
+                $q->where('status', 'confirmed');
+            })
+            ->where('status', 'submitted'); // Hanya status submitted
+
+        // Filter berdasarkan periode pendaftaran
+        if ($request->filled('periode_id')) {
+            $query->where('periode_pendaftaran_id', $request->periode_id);
+        }
+
+        $pendaftars = $query->orderByDesc('created_at')->get();
+        
+        // Tambahkan informasi kelengkapan dokumen
+        $pendaftars = $pendaftars->map(function ($pendaftar) {
+            $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars;
+            $dokumenTerupload = $pendaftar->documents;
+            
+            $totalDokumen = $dokumenDiperlukan->count();
+            $dokumenLengkap = $dokumenTerupload->count();
+            $dokumenWajibDiperlukan = $dokumenDiperlukan->where('pivot.is_wajib', true)->count();
+            $dokumenWajibLengkap = $dokumenTerupload->whereIn('dokumen_pendaftar_id', 
+                $dokumenDiperlukan->where('pivot.is_wajib', true)->pluck('id'))->count();
+            
+            $pendaftar->kelengkapan_dokumen = [
+                'total_diperlukan' => $totalDokumen,
+                'total_terupload' => $dokumenLengkap,
+                'wajib_diperlukan' => $dokumenWajibDiperlukan,
+                'wajib_terupload' => $dokumenWajibLengkap,
+                'persentase' => $totalDokumen > 0 ? round(($dokumenLengkap / $totalDokumen) * 100) : 0,
+                'status_kelengkapan' => $dokumenWajibLengkap >= $dokumenWajibDiperlukan ? 'lengkap' : 'belum_lengkap'
+            ];
+            
+            return $pendaftar;
+        });
+        
+        // Filter hanya yang dokumennya lengkap
+        $pendaftars = $pendaftars->filter(function ($pendaftar) {
+            return $pendaftar->kelengkapan_dokumen['status_kelengkapan'] === 'lengkap';
+        });
+        
+        // Ambil semua periode untuk dropdown filter
+        $periodes = PeriodePendaftaran::select('id', 'nama_periode')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('admin.pendaftar.index_dokumen_diterima', compact('pendaftars', 'periodes'));
     }
 
     public function show($id)
     {
-        $pendaftar = Pendaftar::with(['periodePendaftaran.jalurPendaftaran', 'periodePendaftaran.gelombang', 'periodePendaftaran.biayaPendaftaran', 'payments'])->findOrFail($id);
+        $pendaftar = Pendaftar::with([
+            'periodePendaftaran.jalurPendaftaran', 
+            'periodePendaftaran.gelombang', 
+            'periodePendaftaran.biayaPendaftaran', 
+            'periodePendaftaran.dokumenPendaftars',
+            'documents.dokumenPendaftar',
+            'payments'
+        ])->findOrFail($id);
 
-        return view('admin.pendaftar.show', compact('pendaftar'));
+        // Tambahkan informasi kelengkapan dokumen detail
+        $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars;
+        $dokumenTerupload = $pendaftar->documents;
+        
+        // Buat mapping dokumen yang sudah diupload
+        $uploadedDokumenIds = $dokumenTerupload->pluck('dokumen_pendaftar_id')->toArray();
+        
+        // Detail dokumen untuk ditampilkan di view
+        $dokumenDetail = $dokumenDiperlukan->map(function ($dokumen) use ($uploadedDokumenIds, $dokumenTerupload) {
+            $isUploaded = in_array($dokumen->id, $uploadedDokumenIds);
+            $uploadedDoc = $isUploaded ? $dokumenTerupload->where('dokumen_pendaftar_id', $dokumen->id)->first() : null;
+            
+            return [
+                'id' => $dokumen->id,
+                'nama_dokumen' => $dokumen->nama_dokumen,
+                'is_wajib' => $dokumen->pivot->is_wajib,
+                'catatan' => $dokumen->pivot->catatan,
+                'is_uploaded' => $isUploaded,
+                'uploaded_at' => $uploadedDoc ? $uploadedDoc->created_at : null,
+                'file_path' => $uploadedDoc ? $uploadedDoc->alamat_dokumen : null,
+                'file_note' => $uploadedDoc ? $uploadedDoc->catatan : null
+            ];
+        });
+
+        return view('admin.pendaftar.show', compact('pendaftar', 'dokumenDetail'));
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatusPembayaran(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:draft,submitted,verified,rejected',
             'status_pembayaran' => 'required|in:pending,confirmed,rejected',
         ]);
 
@@ -92,17 +223,34 @@ class PendaftarController extends Controller
             },
         ])->findOrFail($id);
 
-        // Update status pendaftaran
-        $pendaftar->status = $request->status;
-        $pendaftar->save();
-
         // Update status pembayaran terakhir jika ada
         $latestPayment = $pendaftar->payments->first();
         if ($latestPayment) {
             $latestPayment->status = $request->status_pembayaran;
             $latestPayment->save();
+            
+            $message = 'Status pembayaran berhasil diupdate menjadi ' . ucfirst($request->status_pembayaran);
+        } else {
+            $message = 'Pendaftar belum memiliki riwayat pembayaran';
         }
 
-        return redirect()->back()->with('success', 'Status berhasil diupdate.');
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function updateStatusDokumen(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:draft,submitted,rejected',
+        ]);
+
+        $pendaftar = Pendaftar::findOrFail($id);
+
+        // Update status pendaftaran (untuk konteks dokumen)
+        $pendaftar->status = $request->status;
+        $pendaftar->save();
+
+        $message = 'Status dokumen pendaftar berhasil diupdate menjadi ' . ucfirst($request->status);
+        
+        return redirect()->back()->with('success', $message);
     }
 }

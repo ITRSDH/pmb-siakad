@@ -43,8 +43,8 @@ class Pendaftar extends Model
         'alamat',
         'pendidikan_terakhir',
         'status',
-        'source',
-        'meta',
+        'asal_sekolah',
+        'asal_info',
     ];
 
     protected $casts = [

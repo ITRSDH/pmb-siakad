@@ -19,6 +19,7 @@ class PendaftarDocuments extends Model
 
     protected $fillable = [
         'pendaftar_id',
+        'dokumen_pendaftar_id',
         'alamat_dokumen',
         'catatan',  
     ];
@@ -28,9 +29,20 @@ class PendaftarDocuments extends Model
         'updated_at' => 'datetime',
     ];
 
+    // Route model binding menggunakan UUID
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+
     // Relationships
     public function pendaftar()
     {
         return $this->belongsTo(Pendaftar::class);
+    }
+
+    public function dokumenPendaftar()
+    {
+        return $this->belongsTo(\App\Models\DokumenPendaftar::class);
     }
 }

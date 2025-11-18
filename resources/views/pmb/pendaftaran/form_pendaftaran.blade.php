@@ -9,12 +9,15 @@
                 {{ $periode->nama_periode }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Silakan lengkapi data diri Anda. Data dapat disimpan
                 sebagai draft terlebih dahulu.</p>
+            <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+                <span class="text-red-500">*</span> Field wajib diisi
+            </p>
 
             <form method="POST" action="{{ route('pmb.daftar.store', $periode->id) }}" enctype="multipart/form-data" class="mt-6 space-y-4">
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Lengkap</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Lengkap <span class="text-red-500">*</span></label>
                     <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
                     @error('nama_lengkap')
@@ -25,15 +28,16 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">NIK</label>
-                        <input type="number" name="nik" value="{{ old('nik') }}"
-                            minlength="16" maxlength="16"
-                            oninput="if(this.value.length > 16) this.value = this.value.slice(0,16);"
+                        <input type="text" name="nik" value="{{ old('nik') }}"
+                            maxlength="16"
+                            pattern="[0-9]{16}"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 16);"
                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                            required
                             placeholder="Masukkan 16 digit NIK" />
                         @error('nik')
                             <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
+                        <p class="text-xs text-gray-500 mt-1">NIK harus 16 digit angka</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
@@ -47,20 +51,22 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">No. HP</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">No. HP <span class="text-red-500">*</span></label>
                         <input type="tel" name="no_hp" value="{{ old('no_hp') }}"
                             minlength="10" maxlength="15"
                             pattern="[0-9]{10,15}"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15);"
                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                             required
                             placeholder="Masukkan nomor HP (10-15 digit)" />
                         @error('no_hp')
                             <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
+                        <p class="text-xs text-gray-500 mt-1">Nomor HP harus 10-15 digit angka</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Kelamin</label>
-                        <select name="jenis_kelamin"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Kelamin <span class="text-red-500">*</span></label>
+                        <select name="jenis_kelamin" required
                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                             <option value="">-- Pilih --</option>
                             <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
@@ -91,12 +97,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pendidikan Terakhir</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pendidikan Terakhir <span class="text-red-500">*</span></label>
                     @error('pendidikan_terakhir')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
-                    <select name="pendidikan_terakhir"
+                    <select name="pendidikan_terakhir" required
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="">-- Pilih --</option>
                         <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
                         <option value="SMK" {{ old('pendidikan_terakhir') == 'SMK' ? 'selected' : '' }}>SMK</option>
                         <option value="MA" {{ old('pendidikan_terakhir') == 'MA' ? 'selected' : '' }}>MA</option>
@@ -104,12 +111,27 @@
                     </select>
                 </div>
 
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Upload Dokumen KTP (PDF)</label>
-                    <input type="file" name="documents[ktp]" accept="application/pdf" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-white dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                    @error('documents.ktp')
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Asal Sekolah</label>
+                    <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}"
+                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
+                    @error('asal_sekolah')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Sumber Informasi <span class="text-red-500">*</span></label>
+                    @error('sumber_informasi')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                    <select name="sumber_informasi" required
+                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="">-- Pilih --</option>
+                        <option value="Guru BK" {{ old('sumber_informasi') == 'Guru BK' ? 'selected' : '' }}>Guru BK</option>
+                        <option value="Website" {{ old('sumber_informasi') == 'Website' ? 'selected' : '' }}>Website</option>
+                        <option value="Telegram" {{ old('sumber_informasi') == 'Telegram' ? 'selected' : '' }}>Telegram</option>
+                    </select>
                 </div>
 
                 <div class="flex items-center justify-between mt-6">

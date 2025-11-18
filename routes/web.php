@@ -5,15 +5,18 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\JalurPendaftaranController;
 use App\Http\Controllers\Admin\GelombangController;
 use App\Http\Controllers\Admin\BiayaPendaftaranController;
+use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\PeriodePendaftaranController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PendaftarController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\DokumenPendaftarController;
 use App\Http\Controllers\Mahasiswa\PendaftaranController as MahasiswaPendaftaranController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\RiwayatPendaftaranController;
 use App\Http\Controllers\Mahasiswa\PengumumanController;
 use App\Http\Controllers\Mahasiswa\PembayaranController;
+use App\Http\Controllers\Mahasiswa\KelengkapanDokumenController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -92,6 +95,19 @@ Route::prefix('mahasiswa')->group(function () {
     Route::get('/pmb/pembayaran/{id}/bukti', [PembayaranController::class, 'showBukti'])
         ->middleware('auth:google')
         ->name('pmb.pembayaran.bukti');
+
+    // Kelengkapan Dokumen routes (hanya untuk yang sudah membayar)
+    Route::resource('pmb/dokumen', KelengkapanDokumenController::class)
+        ->middleware('auth:google')
+        ->names([
+            'index' => 'pmb.dokumen.index',
+            'create' => 'pmb.dokumen.create',
+            'store' => 'pmb.dokumen.store',
+            'show' => 'pmb.dokumen.show',
+            'edit' => 'pmb.dokumen.edit',
+            'update' => 'pmb.dokumen.update',
+            'destroy' => 'pmb.dokumen.destroy'
+        ]);
 });
 
 // Halaman login admin
@@ -108,14 +124,21 @@ Route::middleware('admin')->group(function () {
     Route::resource('jalur-pendaftaran', JalurPendaftaranController::class);
     Route::resource('gelombang', GelombangController::class);
     Route::resource('biaya-pendaftaran', BiayaPendaftaranController::class);
+    Route::resource('prodi', ProdiController::class);
     Route::resource('periode-pendaftaran', PeriodePendaftaranController::class);
+    Route::resource('dokumen-pendaftar', DokumenPendaftarController::class);
 
-    Route::get('/pendaftar/menunggu', [PendaftarController::class, 'indexMenunggu'])->name('pendaftar.index');
-    Route::get('/pendaftar/diterima', [PendaftarController::class, 'indexDiterima'])->name('pendaftar.diterima');
+    Route::get('/pendaftar/pembayaran/menunggu', [PendaftarController::class, 'indexPembayaranMenunggu'])->name('pendaftar.pembayaran.menunggu');
+    Route::get('/pendaftar/pembayaran/diterima', [PendaftarController::class, 'indexPembayaranDiterima'])->name('pendaftar.pembayaran.diterima');
+    Route::get('/pendaftar/dokumen/menunggu', [PendaftarController::class, 'indexDokumenMenunggu'])->name('pendaftar.dokumen.menunggu');
+    Route::get('/pendaftar/dokumen/diterima', [PendaftarController::class, 'indexDokumenDiterima'])->name('pendaftar.dokumen.diterima');
     Route::get('/pendaftar/{id}', [PendaftarController::class, 'show'])->name('pendaftar.show');
-
-    // PATCH route untuk update status pendaftar (admin)
-    Route::patch('/admin/pendaftar/{id}/update-status', [PendaftarController::class, 'updateStatus'])->name('pendaftar.update-status');
+    
+    // PATCH route untuk update status pembayaran (admin) - khusus menu pembayaran
+    Route::patch('/admin/pendaftar/{id}/update-status-pembayaran', [PendaftarController::class, 'updateStatusPembayaran'])->name('pendaftar.update-status-pembayaran');
+    
+    // PATCH route untuk update status dokumen (admin) - khusus menu dokumen
+    Route::patch('/admin/pendaftar/{id}/update-status-dokumen', [PendaftarController::class, 'updateStatusDokumen'])->name('pendaftar.update-status-dokumen');
 
     // AJAX Routes for dynamic dropdowns
     Route::get('/ajax/biaya-by-jalur', [PeriodePendaftaranController::class, 'getBiayaByJalur'])->name('ajax.biaya-by-jalur');

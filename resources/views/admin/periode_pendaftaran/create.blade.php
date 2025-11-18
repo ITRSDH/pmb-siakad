@@ -209,6 +209,78 @@
                         </div>
                     </div>
 
+                    <!-- Section Syarat Dokumen -->
+                    <div class="form-group">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            Syarat Dokumen Pendaftaran
+                        </label>
+                        <p class="text-muted mb-3">Pilih dokumen yang diperlukan untuk periode pendaftaran ini</p>
+                        
+                        @if($dokumenPendaftars->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th width="50">
+                                                <input type="checkbox" id="selectAll" class="form-check-input">
+                                            </th>
+                                            <th>Nama Dokumen</th>
+                                            <th>Tipe</th>
+                                            <th width="120" class="text-center">Wajib</th>
+                                            <th>Catatan Khusus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($dokumenPendaftars as $dokumen)
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" 
+                                                       name="dokumen_pendaftar_ids[]" 
+                                                       value="{{ $dokumen->id }}"
+                                                       class="form-check-input dokumen-checkbox"
+                                                       {{ in_array($dokumen->id, old('dokumen_pendaftar_ids', [])) ? 'checked' : '' }}>
+                                            </td>
+                                            <td>
+                                                <strong>{{ $dokumen->nama_dokumen }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-{{ $dokumen->tipe_dokumen == 'wajib' ? 'danger' : 'info' }}">
+                                                    {{ ucfirst($dokumen->tipe_dokumen) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="checkbox" 
+                                                       name="dokumen_wajib[{{ $dokumen->id }}]"
+                                                       value="1"
+                                                       class="form-check-input wajib-checkbox"
+                                                       {{ old("dokumen_wajib.{$dokumen->id}") ? 'checked' : ($dokumen->tipe_dokumen == 'wajib' ? 'checked' : '') }}>
+                                            </td>
+                                            <td>
+                                                <input type="text" 
+                                                       name="dokumen_catatan[{{ $dokumen->id }}]"
+                                                       class="form-control form-control-sm"
+                                                       placeholder="Catatan khusus (opsional)"
+                                                       value="{{ old("dokumen_catatan.{$dokumen->id}") }}">
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Tips:</strong> Centang dokumen yang diperlukan, kemudian tentukan apakah dokumen tersebut wajib atau opsional untuk periode ini.
+                            </small>
+                        @else
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Belum ada dokumen pendaftar yang tersedia. 
+                                <a href="{{ route('dokumen-pendaftar.create') }}" class="alert-link">Tambah dokumen pendaftar</a> terlebih dahulu.
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="card-action">
                         <button type="submit" class="btn btn-success">
                             <span class="btn-label"><i class="fa fa-check"></i></span>
@@ -332,6 +404,63 @@ document.addEventListener('DOMContentLoaded', function() {
     if (jalurSelect.value) {
         jalurSelect.dispatchEvent(new Event('change'));
     }
+
+    // === Dokumen Management ===
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const dokumenCheckboxes = document.querySelectorAll('.dokumen-checkbox');
+    const wajibCheckboxes = document.querySelectorAll('.wajib-checkbox');
+
+    // Select All functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            dokumenCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+                toggleRowState(checkbox);
+            });
+        });
+    }
+
+    // Individual checkbox handling
+    dokumenCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            toggleRowState(this);
+            updateSelectAllState();
+        });
+        
+        // Initialize row state
+        toggleRowState(checkbox);
+    });
+
+    function toggleRowState(checkbox) {
+        const row = checkbox.closest('tr');
+        const wajibCheckbox = row.querySelector('.wajib-checkbox');
+        const catatanInput = row.querySelector('input[name^="dokumen_catatan"]');
+        
+        if (checkbox.checked) {
+            row.classList.add('table-active');
+            wajibCheckbox.disabled = false;
+            catatanInput.disabled = false;
+        } else {
+            row.classList.remove('table-active');
+            wajibCheckbox.disabled = true;
+            wajibCheckbox.checked = false;
+            catatanInput.disabled = true;
+            catatanInput.value = '';
+        }
+    }
+
+    function updateSelectAllState() {
+        if (selectAllCheckbox) {
+            const checkedCount = document.querySelectorAll('.dokumen-checkbox:checked').length;
+            const totalCount = dokumenCheckboxes.length;
+            
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+            selectAllCheckbox.checked = checkedCount === totalCount;
+        }
+    }
+
+    // Initialize select all state
+    updateSelectAllState();
 });
 </script>
 @endpush

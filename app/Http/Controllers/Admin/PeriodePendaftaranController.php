@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BiayaPendaftaran;
+use App\Models\DokumenPendaftar;
 use App\Models\Gelombang;
 use App\Models\JalurPendaftaran;
 use App\Models\PeriodePendaftaran;
@@ -34,8 +35,9 @@ class PeriodePendaftaranController extends Controller
         $gelombangs = Gelombang::orderBy('nama_gelombang')->get();
         $jalurPendaftarans = JalurPendaftaran::orderBy('nama_jalur')->get();
         $biayaPendaftarans = BiayaPendaftaran::with('jalurPendaftaran')->orderBy('nama_biaya')->get();
+        $dokumenPendaftars = DokumenPendaftar::orderBy('nama_dokumen')->get();
 
-        return view('admin.periode_pendaftaran.create', compact('gelombangs', 'jalurPendaftarans', 'biayaPendaftarans'));
+        return view('admin.periode_pendaftaran.create', compact('gelombangs', 'jalurPendaftarans', 'biayaPendaftarans', 'dokumenPendaftars'));
     }
 
     /**
@@ -53,6 +55,10 @@ class PeriodePendaftaranController extends Controller
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'kuota' => 'required|integer|min:1|max:10000',
             'status' => 'required|in:aktif,nonaktif,draft,selesai',
+            'dokumen_pendaftar_ids' => 'nullable|array',
+            'dokumen_pendaftar_ids.*' => 'exists:dokumen_pendaftar,id',
+            'dokumen_wajib' => 'nullable|array',
+            'dokumen_catatan' => 'nullable|array',
         ]);
 
         // Validasi duplikasi periode
@@ -88,6 +94,18 @@ class PeriodePendaftaranController extends Controller
 
         $periodePendaftaran = PeriodePendaftaran::create($validatedData);
 
+        // Sync dokumen pendaftar dengan periode
+        if ($request->filled('dokumen_pendaftar_ids')) {
+            $dokumenData = [];
+            foreach ($request->dokumen_pendaftar_ids as $dokumenId) {
+                $dokumenData[$dokumenId] = [
+                    'is_wajib' => isset($request->dokumen_wajib[$dokumenId]) ? true : false,
+                    'catatan' => $request->dokumen_catatan[$dokumenId] ?? null,
+                ];
+            }
+            $periodePendaftaran->dokumenPendaftars()->sync($dokumenData);
+        }
+
         return redirect()->route('periode-pendaftaran.index')->with('success', 'Periode pendaftaran berhasil ditambahkan.');
     }
 
@@ -96,7 +114,7 @@ class PeriodePendaftaranController extends Controller
      */
     public function show(PeriodePendaftaran $periodePendaftaran): View
     {
-        $periodePendaftaran->load(['gelombang', 'jalurPendaftaran', 'biayaPendaftaran']);
+        $periodePendaftaran->load(['gelombang', 'jalurPendaftaran', 'biayaPendaftaran', 'dokumenPendaftars']);
 
         return view('admin.periode_pendaftaran.show', compact('periodePendaftaran'));
     }
@@ -109,8 +127,12 @@ class PeriodePendaftaranController extends Controller
         $gelombangs = Gelombang::orderBy('nama_gelombang')->get();
         $jalurPendaftarans = JalurPendaftaran::orderBy('nama_jalur')->get();
         $biayaPendaftarans = BiayaPendaftaran::with('jalurPendaftaran')->orderBy('nama_biaya')->get();
+        $dokumenPendaftars = DokumenPendaftar::orderBy('nama_dokumen')->get();
+        
+        // Load existing dokumen for this periode
+        $periodePendaftaran->load('dokumenPendaftars');
 
-        return view('admin.periode_pendaftaran.edit', compact('periodePendaftaran', 'gelombangs', 'jalurPendaftarans', 'biayaPendaftarans'));
+        return view('admin.periode_pendaftaran.edit', compact('periodePendaftaran', 'gelombangs', 'jalurPendaftarans', 'biayaPendaftarans', 'dokumenPendaftars'));
     }
 
     /**
@@ -128,6 +150,10 @@ class PeriodePendaftaranController extends Controller
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'kuota' => 'required|integer|min:1|max:10000',
             'status' => 'required|in:aktif,nonaktif,draft,selesai',
+            'dokumen_pendaftar_ids' => 'nullable|array',
+            'dokumen_pendaftar_ids.*' => 'exists:dokumen_pendaftar,id',
+            'dokumen_wajib' => 'nullable|array',
+            'dokumen_catatan' => 'nullable|array',
         ]);
 
         // Validasi kuota tidak boleh lebih kecil dari kuota terisi
@@ -169,6 +195,21 @@ class PeriodePendaftaranController extends Controller
         }
 
         $periodePendaftaran->update($validatedData);
+
+        // Sync dokumen pendaftar dengan periode
+        if ($request->filled('dokumen_pendaftar_ids')) {
+            $dokumenData = [];
+            foreach ($request->dokumen_pendaftar_ids as $dokumenId) {
+                $dokumenData[$dokumenId] = [
+                    'is_wajib' => isset($request->dokumen_wajib[$dokumenId]) ? true : false,
+                    'catatan' => $request->dokumen_catatan[$dokumenId] ?? null,
+                ];
+            }
+            $periodePendaftaran->dokumenPendaftars()->sync($dokumenData);
+        } else {
+            // Jika tidak ada dokumen yang dipilih, hapus semua relasi
+            $periodePendaftaran->dokumenPendaftars()->detach();
+        }
 
         return redirect()->route('periode-pendaftaran.index')->with('success', 'Periode pendaftaran berhasil diperbarui.');
     }

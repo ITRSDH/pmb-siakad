@@ -5,7 +5,7 @@
 @section('content')
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">Data Pendaftar Menunggu</h3>
+            <h3 class="fw-bold mb-3">Data Pendaftar Pembayaran Menunggu</h3>
             <h6 class="op-7 mb-2">Kelola data pendaftar mahasiswa baru</h6>
         </div>
         {{-- <div class="ms-md-auto py-2 py-md-0">
@@ -54,7 +54,7 @@
                     <!-- Filter Form -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <form method="GET" action="{{ route('pendaftar.index') }}" class="d-flex align-items-end">
+                            <form method="GET" action="{{ route('pendaftar.pembayaran.menunggu') }}" class="d-flex align-items-end">
                                 <div class="me-2" style="min-width: 250px;">
                                     <label for="periode_id" class="form-label">Filter Periode Pendaftaran</label>
                                     <select name="periode_id" id="periode_id" class="form-select">
@@ -73,7 +73,7 @@
                                 </div>
                                 @if(request('periode_id'))
                                     <div>
-                                        <a href="{{ route('pendaftar.index') }}" class="btn btn-secondary">
+                                        <a href="{{ route('pendaftar.pembayaran.menunggu') }}" class="btn btn-secondary">
                                             <i class="fas fa-times"></i> Reset
                                         </a>
                                     </div>
@@ -101,7 +101,6 @@
                                         <th>Email</th>
                                         <th>Periode</th>
                                         <th>Jalur</th>
-                                        <th>Status</th>
                                         <th>Status Pembayaran</th>
                                         <th>Tanggal Daftar</th>
                                         <th style="width: 10%">Aksi</th>
@@ -116,12 +115,6 @@
                                             <td>{{ $p->email }}</td>
                                             <td>{{ optional($p->periodePendaftaran)->nama_periode ?? '-' }}</td>
                                             <td>{{ optional(optional($p->periodePendaftaran)->jalurPendaftaran)->nama_jalur ?? '-' }}
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge badge-{{ $p->status == 'verified' ? 'success' : ($p->status == 'submitted' ? 'info' : ($p->status == 'draft' ? 'warning' : 'danger')) }}">
-                                                    {{ ucfirst($p->status) }}
-                                                </span>
                                             </td>
                                             <td>
                                                 @php
@@ -196,15 +189,6 @@
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="id" id="modalPendaftarId">
-                        <div class="mb-3">
-                            <label for="statusPendaftaran" class="form-label">Status
-                                Pendaftaran</label>
-                            <select class="form-select" id="statusPendaftaran" name="status">
-                                <option value="draft">Draft</option>
-                                <option value="submitted">Submitted</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <label for="statusPembayaran" class="form-label">Status
                                 Pembayaran</label>
@@ -285,7 +269,7 @@
                 document.getElementById('statusPembayaran').value = statusBayar || 'pending';
                 
                 // Set action form
-                var routeTemplate = "{{ route('pendaftar.update-status', ['id' => ':id']) }}";
+                var routeTemplate = "{{ route('pendaftar.update-status-pembayaran', ['id' => ':id']) }}";
                 var actionUrl = routeTemplate.replace(':id', id);
                 document.getElementById('formUbahStatus').action = actionUrl;
                 
@@ -321,7 +305,7 @@
                     modal.find('#statusPendaftaran').val(status);
                     modal.find('#statusPembayaran').val(statusBayar);
                     // Set action form pakai route alias dari Laravel (dari Blade)
-                    var routeTemplate = "{{ route('pendaftar.update-status', ['id' => ':id']) }}";
+                    var routeTemplate = "{{ route('pendaftar.update-status-pembayaran', ['id' => ':id']) }}";
                     var actionUrl = routeTemplate.replace(':id', id);
                     modal.find('#formUbahStatus').attr('action', actionUrl);
                 }

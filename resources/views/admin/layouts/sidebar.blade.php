@@ -73,6 +73,22 @@
                     </a>
                 </li>
 
+                {{-- Program Studi --}}
+                <li class="nav-item {{ request()->routeIs('prodi*') ? 'active' : '' }}">
+                    <a href="{{ route('prodi.index') }}">
+                        <i class="fas fa-graduation-cap"></i>
+                        <p>Program Studi</p>
+                    </a>
+                </li>
+
+                {{-- Dokumen Pendaftar --}}
+                <li class="nav-item {{ request()->routeIs('dokumen-pendaftar*') ? 'active' : '' }}">
+                    <a href="{{ route('dokumen-pendaftar.index') }}">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Dokumen Pendaftar</p>
+                    </a>
+                </li>
+
                 <!-- Periode Pendaftaran -->
                 <li class="nav-item {{ request()->routeIs('periode-pendaftaran*') ? 'active' : '' }}">
                     <a href="{{ route('periode-pendaftaran.index') }}">
@@ -89,32 +105,46 @@
                     <h4 class="text-section">Registrasi</h4>
                 </li>
 
-                <!-- Registrasi Mahasiswa -->
-                <li class="nav-item {{ request()->routeIs('registrasi*') ? 'active' : '' }}">
-                    <a href="#">
-                        <i class="fas fa-user-graduate"></i>
-                        <p>Registrasi Mahasiswa</p>
-                        <span class="badge badge-success">New</span>
-                    </a>
-                </li>
-
-                <!-- Pendaftar -->
+                <!-- Pembayaran -->
                 <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#pendaftar">
+                    <a data-bs-toggle="collapse" href="#pembayaran">
                         <i class="fas fa-users"></i>
-                        <p>Data Pendaftar</p>
+                        <p>Data Pembayaran</p>
                         <span class="caret"></span>
                     </a>
-                    <div class="collapse" id="pendaftar">
+                    <div class="collapse" id="pembayaran">
                         <ul class="nav nav-collapse">
                             <li>
-                                <a href="{{ route('pendaftar.index') }}">
-                                    <span class="sub-item">Pendaftar Menunggu</span>
+                                <a href="{{ route('pendaftar.pembayaran.menunggu') }}">
+                                    <span class="sub-item">Pembayaran Menunggu</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('pendaftar.diterima') }}">
-                                    <span class="sub-item">Pendaftar Diterima</span>
+                                <a href="{{ route('pendaftar.pembayaran.diterima') }}">
+                                    <span class="sub-item">Pembayaran Diterima</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <!-- Dokumen -->
+                <li class="nav-item">
+                    <a data-bs-toggle="collapse" href="#dokumen">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Data Dokumen</p>
+                        <span class="caret"></span>
+                    </a>
+                    <div class="collapse" id="dokumen">
+                        <ul class="nav nav-collapse">
+                            <li>
+                                <a href="{{ route('pendaftar.dokumen.menunggu') }}">
+                                    <span class="sub-item">Dokumen Menunggu</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('pendaftar.dokumen.diterima') }}">
+                                    <span class="sub-item">Dokumen Diterima</span>
                                 </a>
                             </li>
                         </ul>
@@ -154,29 +184,6 @@
                             </li> --}}
                         </ul>
                     </div>
-                </li>
-
-                <!-- Settings -->
-                <li class="nav-section">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 class="text-section">Pengaturan</h4>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#">
-                        <i class="fas fa-cog"></i>
-                        <p>Pengaturan Sistem</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#">
-                        <i class="fas fa-file"></i>
-                        <p>Dokumentasi</p>
-                        <span class="badge badge-secondary">Help</span>
-                    </a>
                 </li>
 
                 <!-- Divider -->

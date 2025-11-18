@@ -56,7 +56,7 @@
                             </div>
                             <div class="text-right">
                                 <div class="mb-1">
-                                    <span class="text-xs text-gray-500">Status Pendaftar:</span>
+                                    <span class="text-xs text-gray-500">Status Dokumen:</span>
                                     <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
                                         @if($statusPendaftar === 'submitted')
                                             bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
@@ -70,6 +70,8 @@
                                             Terverifikasi
                                         @elseif($statusPendaftar === 'rejected')
                                             Ditolak
+                                        @elseif($statusPendaftar === 'draft')
+                                            Menunggu Verifikasi
                                         @else
                                             {{ ucfirst($statusPendaftar) }}
                                         @endif

@@ -124,14 +124,15 @@ class PendaftaranController extends Controller
 
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'nik' => 'nullable|numeric',
+            'nik' => 'nullable|numeric|digits:16',
             'email' => 'nullable|email|max:255',
-            'no_hp' => 'nullable|string|max:30',
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
-            'pendidikan_terakhir' => 'nullable|string|max:255',
-            'documents.ktp' => 'nullable|file|mimes:pdf|max:1024', // 1MB
+            'no_hp' => 'required|string|min:10|max:15|regex:/^[0-9]+$/',
+            'jenis_kelamin' => 'required|in:L,P',
+            'tanggal_lahir' => 'nullable|date|before:today',
+            'alamat' => 'nullable|string|max:1000',
+            'pendidikan_terakhir' => 'required|in:SMA,SMK,MA,PAKET C',
+            'asal_sekolah' => 'nullable|string|max:255',
+            'sumber_informasi' => 'required|in:Guru BK,Website,Telegram',
         ]);
 
         // Prevent duplicate registration for same google user and periode
@@ -158,8 +159,7 @@ class PendaftaranController extends Controller
         }
 
         // Use DB transaction with row lock to prevent race and overbooking
-        $storedFiles = [];
-        $created = DB::transaction(function () use ($validated, $periode, $user, $request, &$storedFiles) {
+        $created = DB::transaction(function () use ($validated, $periode, $user) {
             // Lock the periode row for update
             $lockedPeriode = PeriodePendaftaran::where('id', $periode->id)->lockForUpdate()->first();
 
@@ -169,26 +169,21 @@ class PendaftaranController extends Controller
                 return null;
             }
 
-            $pendaftar = Pendaftar::create(
-                array_merge($validated, [
-                    'periode_pendaftaran_id' => $lockedPeriode->id,
-                    'google_user_id' => $user?->id,
-                    'status' => 'draft',
-                ]),
-            );
-
-            // Handle KTP upload if present (store path in pendaftar_documents)
-            $ktp = $request->file('documents.ktp');
-            if ($ktp) {
-                $path = $ktp->store('pendaftar/ktp', 'public');
-                $storedFiles[] = ['disk' => 'public', 'path' => $path];
-
-                // create document record
-                $pendaftar->documents()->create([
-                    'alamat_dokumen' => $path,
-                    'catatan' => 'KTP (PDF)',
-                ]);
-            }
+            $pendaftar = Pendaftar::create([
+                'periode_pendaftaran_id' => $lockedPeriode->id,
+                'google_user_id' => $user?->id,
+                'nama_lengkap' => $validated['nama_lengkap'],
+                'nik' => $validated['nik'],
+                'email' => $validated['email'],
+                'no_hp' => $validated['no_hp'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+                'alamat' => $validated['alamat'],
+                'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
+                'asal_sekolah' => $validated['asal_sekolah'],
+                'asal_info' => $validated['sumber_informasi'],
+                'status' => 'draft',
+            ]);
 
             // Atomic increment kuota_terisi
             $lockedPeriode->increment('kuota_terisi');
@@ -197,13 +192,6 @@ class PendaftaranController extends Controller
         });
 
         if (!$created) {
-            // cleanup any files stored before failure
-            foreach ($storedFiles as $f) {
-                try {
-                    Storage::disk($f['disk'])->delete($f['path']);
-                } catch (\Throwable $e) {
-                }
-            }
             return redirect()->route('pmb.pendaftaran.index')->with('error', 'Pendaftaran gagal: periode tidak tersedia atau kuota telah penuh.');
         }
 

@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -46,6 +47,24 @@ class PeriodePendaftaran extends Model
     public function pendaftars(): HasMany
     {
         return $this->hasMany(\App\Models\Pendaftar::class, 'periode_pendaftaran_id');
+    }
+
+    public function dokumenPendaftars(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\DokumenPendaftar::class, 'periode_pendaftaran_dokumen')
+                    ->withPivot(['is_wajib', 'catatan'])
+                    ->withTimestamps()
+                    ->orderBy('nama_dokumen');
+    }
+
+    public function dokumenWajib(): BelongsToMany
+    {
+        return $this->dokumenPendaftars()->wherePivot('is_wajib', true);
+    }
+
+    public function dokumenOpsional(): BelongsToMany
+    {
+        return $this->dokumenPendaftars()->wherePivot('is_wajib', false);
     }
 
     // Scopes
