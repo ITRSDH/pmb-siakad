@@ -87,19 +87,38 @@
                                             <td>
                                                 @if(isset($pendaftar->kelengkapan_dokumen))
                                                     <div class="d-flex flex-column">
+                                                        @php
+                                                            $isAllUploaded = $pendaftar->kelengkapan_dokumen['total_terupload'] == $pendaftar->kelengkapan_dokumen['total_diperlukan'];
+                                                            $isWajibComplete = $pendaftar->kelengkapan_dokumen['wajib_terupload'] == $pendaftar->kelengkapan_dokumen['wajib_diperlukan'];
+                                                        @endphp
+                                                        
                                                         <div class="progress mb-1" style="height: 8px;">
-                                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                            <div class="progress-bar {{ $isAllUploaded ? 'bg-success' : 'bg-warning' }}" role="progressbar" 
                                                                  style="width: {{ $pendaftar->kelengkapan_dokumen['persentase'] }}%" 
                                                                  aria-valuenow="{{ $pendaftar->kelengkapan_dokumen['persentase'] }}" 
                                                                  aria-valuemin="0" aria-valuemax="100"></div>
                                                         </div>
-                                                        <small class="text-success">
-                                                            <i class="fa fa-check-circle"></i>
+                                                        
+                                                        <small class="text-muted">
                                                             {{ $pendaftar->kelengkapan_dokumen['total_terupload'] }}/{{ $pendaftar->kelengkapan_dokumen['total_diperlukan'] }} dokumen
                                                         </small>
-                                                        <small class="text-success">
+                                                        <small class="text-muted">
                                                             Wajib: {{ $pendaftar->kelengkapan_dokumen['wajib_terupload'] }}/{{ $pendaftar->kelengkapan_dokumen['wajib_diperlukan'] }}
                                                         </small>
+                                                        
+                                                        @if($isAllUploaded)
+                                                            <small class="text-success fw-bold">
+                                                                <i class="fa fa-check-circle"></i> Dokumen telah diupload semua
+                                                            </small>
+                                                        @elseif($isWajibComplete)
+                                                            <small class="text-primary">
+                                                                <i class="fa fa-info-circle"></i> Dokumen wajib telah lengkap
+                                                            </small>
+                                                        @else
+                                                            <small class="text-warning">
+                                                                <i class="fa fa-exclamation-triangle"></i> Dokumen belum lengkap
+                                                            </small>
+                                                        @endif
                                                     </div>
                                                 @else
                                                     <span class="badge badge-secondary">N/A</span>

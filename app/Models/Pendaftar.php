@@ -44,10 +44,6 @@ class Pendaftar extends Model
         'alamat',
         'pendidikan_terakhir',
         'status',
-        'status_dokumen',
-        'catatan_dokumen',
-        'reviewed_at',
-        'reviewed_by',
         'asal_sekolah',
         'asal_info',
     ];
