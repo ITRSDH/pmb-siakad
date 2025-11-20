@@ -146,14 +146,50 @@
 
 @push('scripts')
 <script>
-    // Auto focus on first input
     $(document).ready(function() {
+        // Auto focus on first input
         $('#nama_gelombang').focus();
+        
+        // Form submission dengan loading modal
+        $('form:not(#deleteForm)').on('submit', function(e) {
+            const submitBtn = $(this).find('button[type="submit"]');
+            
+            // Tampilkan modal loading dengan animasi
+            $('#loadingMessage').text('Memperbarui gelombang pendaftaran...');
+            $('#loadingModal').modal('show');
+            
+            // Update tombol submit
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Memperbarui...');
+            
+            // Tambahkan sedikit delay untuk user experience
+            setTimeout(() => {
+                // Form akan submit secara otomatis setelah delay
+            }, 100);
+            
+            // Biarkan form submit secara normal
+            return true;
+        });
+        
+        // Hide loading jika ada error (page reload)
+        $(window).on('load', function() {
+            $('#loadingModal').modal('hide');
+        });
     });
 
     function confirmDelete() {
         if (confirm('Apakah Anda yakin ingin menghapus gelombang "{{ $gelombang->nama_gelombang }}"? \n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
-            document.getElementById('deleteForm').submit();
+            // Tampilkan modal loading untuk delete
+            $('#loadingMessage').text('Menghapus gelombang pendaftaran...');
+            $('#loadingModal').modal('show');
+            
+            // Update delete button
+            $('button[onclick="confirmDelete()"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menghapus...');
+            
+            // Submit form delete dengan delay
+            setTimeout(() => {
+                document.getElementById('deleteForm').submit();
+            }, 300);
         }
     }
 </script>

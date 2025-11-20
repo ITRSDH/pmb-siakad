@@ -19,4 +19,10 @@ class Prodi extends Model
         'kode_prodi',
         'deskripsi',
     ];
+
+    // Relationships
+    public function pendaftar()
+    {
+        return $this->hasMany(\App\Models\Pendaftar::class);
+    }
 }

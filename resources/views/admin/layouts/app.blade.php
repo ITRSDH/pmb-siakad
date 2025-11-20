@@ -30,6 +30,31 @@
     <link rel="stylesheet" href="{{ asset('template/kaiadmin/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/kaiadmin/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('template/kaiadmin/css/kaiadmin.min.css') }}" />
+    
+    <!-- Simple Loading Modal Styles -->
+    <style>
+        #loadingModal .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        #loadingModal .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        #loadingModal .modal-body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
 
     @stack('styles')
 </head>
@@ -120,5 +145,20 @@
             }
         });
     </script>
+    
+    <!-- Simple Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" style="display: none;">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content fade-in">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-white mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h6 class="mb-0" id="loadingMessage">Memproses data...</h6>
+                    <small class="text-white-50">Mohon tunggu sebentar</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

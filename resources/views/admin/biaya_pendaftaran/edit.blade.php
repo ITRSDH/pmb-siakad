@@ -183,6 +183,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const hiddenInput = document.getElementById('jumlah_biaya');
     const previewAmount = document.getElementById('preview_amount');
     
+    // Form submission dengan loading modal
+    $('form:not(#deleteForm)').on('submit', function(e) {
+        const submitBtn = $(this).find('button[type="submit"]');
+        
+        // Tampilkan modal loading dengan animasi
+        $('#loadingMessage').text('Memperbarui biaya pendaftaran...');
+        $('#loadingModal').modal('show');
+        
+        // Update tombol submit
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Memperbarui...');
+        
+        // Tambahkan sedikit delay untuk user experience
+        setTimeout(() => {
+            // Form akan submit secara otomatis setelah delay
+        }, 100);
+        
+        // Biarkan form submit secara normal
+        return true;
+    });
+    
+    // Hide loading jika ada error (page reload)
+    $(window).on('load', function() {
+        $('#loadingModal').modal('hide');
+    });
+    
     // Format currency display
     function formatCurrency(value) {
         return new Intl.NumberFormat('id-ID').format(value);
@@ -230,85 +256,19 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function confirmDelete() {
-    swal({
-        title: "Hapus Biaya Pendaftaran?",
-        text: "Data yang dihapus tidak dapat dikembalikan!",
-        type: "warning",
-        buttons: {
-            cancel: {
-                visible: true,
-                text: "Batal",
-                className: "btn btn-danger"
-            },
-            confirm: {
-                text: "Ya, Hapus!",
-                className: "btn btn-success"
-            }
-        }
-    }).then((willDelete) => {
-        if (willDelete) {
+    if (confirm('Apakah Anda yakin ingin menghapus biaya pendaftaran ini? \n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        // Tampilkan modal loading untuk delete
+        $('#loadingMessage').text('Menghapus biaya pendaftaran...');
+        $('#loadingModal').modal('show');
+        
+        // Update delete button
+        $('button[onclick="confirmDelete()"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menghapus...');
+        
+        // Submit form delete dengan delay
+        setTimeout(() => {
             document.getElementById('deleteForm').submit();
-        }
-    });
+        }, 300);
+    }
 }
 </script>
 @endpush
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const displayInput = document.getElementById('jumlah_biaya_display');
-    const hiddenInput = document.getElementById('jumlah_biaya');
-    const previewAmount = document.getElementById('preview_amount');
-    
-    // Format angka dengan thousand separator
-    function formatNumber(value) {
-        return new Intl.NumberFormat('id-ID').format(value);
-    }
-    
-    // Hapus semua karakter non-digit
-    function unformatNumber(value) {
-        return value.replace(/\D/g, '');
-    }
-    
-    // Set nilai awal dari hidden input ke display input
-    if (hiddenInput.value) {
-        displayInput.value = formatNumber(hiddenInput.value);
-        updatePreview(hiddenInput.value);
-    }
-    
-    // Event listener untuk input display
-    displayInput.addEventListener('input', function(e) {
-        let value = unformatNumber(e.target.value);
-        
-        // Update hidden input dengan nilai asli
-        hiddenInput.value = value;
-        
-        // Format display input
-        if (value) {
-            e.target.value = formatNumber(value);
-            updatePreview(value);
-        } else {
-            e.target.value = '';
-            previewAmount.textContent = '';
-        }
-    });
-    
-    // Update preview text
-    function updatePreview(value) {
-        if (value && value > 0) {
-            const formatted = formatNumber(value);
-            previewAmount.textContent = `💰 Preview: Rp ${formatted}`;
-        } else {
-            previewAmount.textContent = '';
-        }
-    }
-    
-    // Validasi hanya angka
-    displayInput.addEventListener('keypress', function(e) {
-        // Hanya izinkan angka dan beberapa karakter khusus
-        if (!/[\d.]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-            e.preventDefault();
-        }
-    });
-});
-</script>

@@ -91,6 +91,10 @@
                             <td>: {{ $pendaftar->periodePendaftaran->jalurPendaftaran->nama_jalur ?? 'N/A' }}</td>
                         </tr>
                         <tr>
+                            <td><strong>Program Studi Pilihan</strong></td>
+                            <td>: {{ $pendaftar->prodi->nama_prodi ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
                             <td><strong>Biaya Pendaftaran</strong></td>
                             <td>: Rp
                                 {{ number_format($pendaftar->periodePendaftaran->biayaPendaftaran->jumlah_biaya ?? 0, 0, ',', '.') }}

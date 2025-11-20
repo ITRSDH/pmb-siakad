@@ -34,6 +34,7 @@ class Pendaftar extends Model
         'user_id',
         'google_user_id',
         'periode_pendaftaran_id',
+        'prodi_id',
         'nama_lengkap',
         'nik',
         'email',
@@ -43,12 +44,17 @@ class Pendaftar extends Model
         'alamat',
         'pendidikan_terakhir',
         'status',
+        'status_dokumen',
+        'catatan_dokumen',
+        'reviewed_at',
+        'reviewed_by',
         'asal_sekolah',
         'asal_info',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
+        'reviewed_at' => 'datetime',
         'meta' => 'array',
     ];
 
@@ -66,6 +72,16 @@ class Pendaftar extends Model
     public function googleUser()
     {
         return $this->belongsTo(\App\Models\GoogleUser::class);
+    }
+
+    public function prodi()
+    {
+        return $this->belongsTo(\App\Models\Prodi::class);
+    }
+
+    public function reviewedBy()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'reviewed_by');
     }
 
     // Documents uploaded by the pendaftar
@@ -88,6 +104,81 @@ class Pendaftar extends Model
         }
 
         return Carbon::parse($this->tanggal_lahir)->age;
+    }
+
+    /**
+     * Get status dokumen badge class
+     */
+    public function getStatusDokumenBadgeAttribute()
+    {
+        return match($this->status_dokumen) {
+            'belum_upload' => 'secondary',
+            'upload_parsial' => 'warning', 
+            'menunggu_review' => 'info',
+            'review_revision' => 'danger',
+            'dokumen_diterima' => 'success',
+            'dokumen_ditolak' => 'danger',
+            default => 'secondary'
+        };
+    }
+
+    /**
+     * Get status dokumen display text
+     */
+    public function getStatusDokumenTextAttribute()
+    {
+        return match($this->status_dokumen) {
+            'belum_upload' => 'Belum Upload',
+            'upload_parsial' => 'Upload Parsial', 
+            'menunggu_review' => 'Menunggu Review',
+            'review_revision' => 'Perlu Revisi',
+            'dokumen_diterima' => 'Dokumen Diterima',
+            'dokumen_ditolak' => 'Dokumen Ditolak',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Check if dokumen sudah lengkap dan layak direview
+     */
+    public function isDokumenReadyForReview()
+    {
+        // Logic untuk cek apakah semua dokumen wajib sudah diupload
+        $dokumenWajib = $this->periodePendaftaran
+            ->dokumenPendaftars()
+            ->wherePivot('is_wajib', true)
+            ->count();
+            
+        $dokumenWajibUploaded = $this->documents()
+            ->whereHas('dokumenPendaftar', function($query) {
+                $query->whereIn('id', $this->periodePendaftaran
+                    ->dokumenPendaftars()
+                    ->wherePivot('is_wajib', true)
+                    ->pluck('id')
+                );
+            })
+            ->count();
+            
+        return $dokumenWajib > 0 && $dokumenWajibUploaded >= $dokumenWajib;
+    }
+
+    /**
+     * Auto update status dokumen berdasarkan kondisi upload
+     */
+    public function updateStatusDokumen()
+    {
+        $totalDokumen = $this->periodePendaftaran->dokumenPendaftars()->count();
+        $dokumenUploaded = $this->documents()->count();
+        
+        if ($dokumenUploaded === 0) {
+            $this->status_dokumen = 'belum_upload';
+        } elseif ($dokumenUploaded < $totalDokumen || !$this->isDokumenReadyForReview()) {
+            $this->status_dokumen = 'upload_parsial';
+        } elseif ($this->isDokumenReadyForReview() && $this->status_dokumen === 'upload_parsial') {
+            $this->status_dokumen = 'menunggu_review';
+        }
+        
+        $this->save();
     }
 
     // Boot: generate nomor_pendaftaran if not provided
