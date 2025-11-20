@@ -17,6 +17,22 @@
                 @csrf
 
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Program Studi <span class="text-red-500">*</span></label>
+                    <select name="prodi_id" required
+                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="">-- Pilih Program Studi --</option>
+                        @foreach($prodis as $prodi)
+                            <option value="{{ $prodi->id }}" {{ old('prodi_id') == $prodi->id ? 'selected' : '' }}>
+                                {{ $prodi->nama_prodi }} ({{ $prodi->kode_prodi }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('prodi_id')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Lengkap <span class="text-red-500">*</span></label>
                     <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />

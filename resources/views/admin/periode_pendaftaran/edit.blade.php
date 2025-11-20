@@ -375,6 +375,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Current selected values
     const currentBiayaId = '{{ old('biaya_pendaftaran_id', $periodePendaftaran->biaya_pendaftaran_id) }}';
 
+    // Form submission dengan loading modal
+    $('form:not(#deleteForm)').on('submit', function(e) {
+        const submitBtn = $(this).find('button[type="submit"]');
+        
+        // Tampilkan modal loading dengan animasi
+        $('#loadingMessage').text('Memperbarui periode pendaftaran...');
+        $('#loadingModal').modal('show');
+        
+        // Update tombol submit
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Memperbarui...');
+        
+        // Tambahkan sedikit delay untuk user experience
+        setTimeout(() => {
+            // Form akan submit secara otomatis setelah delay
+        }, 100);
+        
+        // Biarkan form submit secara normal
+        return true;
+    });
+    
+    // Hide loading jika ada error (page reload)
+    $(window).on('load', function() {
+        $('#loadingModal').modal('hide');
+    });
+
     // AJAX untuk load biaya berdasarkan jalur pendaftaran
     jalurSelect.addEventListener('change', function() {
         const jalurId = this.value;
@@ -522,7 +548,17 @@ function confirmDelete() {
         }
     }).then((willDelete) => {
         if (willDelete) {
-            document.getElementById('deleteForm').submit();
+            // Tampilkan modal loading untuk delete
+            $('#loadingMessage').text('Menghapus periode pendaftaran...');
+            $('#loadingModal').modal('show');
+            
+            // Update delete button
+            $('button[onclick="confirmDelete()"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menghapus...');
+            
+            // Submit form delete dengan delay
+            setTimeout(() => {
+                document.getElementById('deleteForm').submit();
+            }, 300);
         }
     });
 }

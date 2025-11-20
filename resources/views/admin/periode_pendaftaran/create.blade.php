@@ -338,6 +338,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const tanggalMulai = document.getElementById('tanggal_mulai');
     const tanggalSelesai = document.getElementById('tanggal_selesai');
 
+    // Form submission dengan loading modal
+    $('form').on('submit', function(e) {
+        const submitBtn = $(this).find('button[type="submit"]');
+        
+        // Tampilkan modal loading dengan animasi
+        $('#loadingMessage').text('Menyimpan periode pendaftaran...');
+        $('#loadingModal').modal('show');
+        
+        // Update tombol submit
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...');
+        
+        // Tambahkan sedikit delay untuk user experience
+        setTimeout(() => {
+            // Form akan submit secara otomatis setelah delay
+        }, 100);
+        
+        // Biarkan form submit secara normal
+        return true;
+    });
+    
+    // Hide loading jika ada error (page reload)
+    $(window).on('load', function() {
+        $('#loadingModal').modal('hide');
+    });
+
     // AJAX untuk load biaya berdasarkan jalur pendaftaran
     jalurSelect.addEventListener('change', function() {
         const jalurId = this.value;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\PeriodePendaftaran;
 use App\Models\Pendaftar;
+use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -108,7 +109,10 @@ class PendaftaranController extends Controller
             }
         }
 
-        return view('pmb.pendaftaran.form_pendaftaran', compact('periode', 'user'));
+        // Get available prodi
+        $prodis = Prodi::orderBy('nama_prodi', 'asc')->get();
+
+        return view('pmb.pendaftaran.form_pendaftaran', compact('periode', 'user', 'prodis'));
     }
 
     /**
@@ -133,6 +137,7 @@ class PendaftaranController extends Controller
             'pendidikan_terakhir' => 'required|in:SMA,SMK,MA,PAKET C',
             'asal_sekolah' => 'nullable|string|max:255',
             'sumber_informasi' => 'required|in:Guru BK,Website,Telegram',
+            'prodi_id' => 'required|exists:prodi,id',
         ]);
 
         // Prevent duplicate registration for same google user and periode
@@ -172,6 +177,7 @@ class PendaftaranController extends Controller
             $pendaftar = Pendaftar::create([
                 'periode_pendaftaran_id' => $lockedPeriode->id,
                 'google_user_id' => $user?->id,
+                'prodi_id' => $validated['prodi_id'],
                 'nama_lengkap' => $validated['nama_lengkap'],
                 'nik' => $validated['nik'],
                 'email' => $validated['email'],

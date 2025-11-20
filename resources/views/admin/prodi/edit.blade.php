@@ -165,15 +165,51 @@
 
 @push('scripts')
 <script>
-function confirmDelete() {
-    if (confirm('Apakah Anda yakin ingin menghapus program studi "' + '{{ $prodi->nama_prodi }}' + '"? Tindakan ini tidak dapat dibatalkan.')) {
-        document.getElementById('deleteForm').submit();
-    }
-}
-
 $(document).ready(function() {
     // Auto focus on first input
     $('#nama_prodi').focus();
+    
+    // Form submission dengan loading modal
+    $('form:not(#deleteForm)').on('submit', function(e) {
+        const submitBtn = $(this).find('button[type="submit"]');
+        
+        // Tampilkan modal loading dengan animasi
+        $('#loadingMessage').text('Memperbarui program studi...');
+        $('#loadingModal').modal('show');
+        
+        // Update tombol submit
+        submitBtn.prop('disabled', true);
+        submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Memperbarui...');
+        
+        // Tambahkan sedikit delay untuk user experience
+        setTimeout(() => {
+            // Form akan submit secara otomatis setelah delay
+        }, 100);
+        
+        // Biarkan form submit secara normal
+        return true;
+    });
+    
+    // Hide loading jika ada error (page reload)
+    $(window).on('load', function() {
+        $('#loadingModal').modal('hide');
+    });
 });
+
+function confirmDelete() {
+    if (confirm('Apakah Anda yakin ingin menghapus program studi "{{ $prodi->nama_prodi }}"? \n\nTindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait.')) {
+        // Tampilkan modal loading untuk delete
+        $('#loadingMessage').text('Menghapus program studi...');
+        $('#loadingModal').modal('show');
+        
+        // Update delete button
+        $('button[onclick="confirmDelete()"]').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Menghapus...');
+        
+        // Submit form delete dengan delay
+        setTimeout(() => {
+            document.getElementById('deleteForm').submit();
+        }, 300);
+    }
+}
 </script>
 @endpush

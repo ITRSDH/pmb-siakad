@@ -66,6 +66,7 @@
                                         <th>Email</th>
                                         <th>Periode</th>
                                         <th>Kelengkapan Dokumen</th>
+                                        <th>Status Dokumen</th>
                                         <th>Status Pembayaran</th>
                                         <th>Tanggal Daftar</th>
                                         <th>Aksi</th>
@@ -100,6 +101,21 @@
                                                             Wajib: {{ $pendaftar->kelengkapan_dokumen['wajib_terupload'] }}/{{ $pendaftar->kelengkapan_dokumen['wajib_diperlukan'] }}
                                                         </small>
                                                     </div>
+                                                @else
+                                                    <span class="badge badge-secondary">N/A</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if(isset($pendaftar->status))
+                                                    @if ($pendaftar->status === 'draft')
+                                                        <span class="badge badge-secondary">Menunggu Persetujuan</span>
+                                                    @elseif ($pendaftar->status === 'submitted')
+                                                        <span class="badge badge-primary">Diterima</span>
+                                                    @elseif ($pendaftar->status === 'rejected')
+                                                        <span class="badge badge-danger">Ditolak</span>
+                                                    @else
+                                                        <span class="badge badge-light">Belum Diajukan</span>
+                                                    @endif
                                                 @else
                                                     <span class="badge badge-secondary">N/A</span>
                                                 @endif

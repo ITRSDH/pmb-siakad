@@ -181,6 +181,7 @@ class PendaftarController extends Controller
             'periodePendaftaran.biayaPendaftaran', 
             'periodePendaftaran.dokumenPendaftars',
             'documents.dokumenPendaftar',
+            'prodi',
             'payments'
         ])->findOrFail($id);
 
