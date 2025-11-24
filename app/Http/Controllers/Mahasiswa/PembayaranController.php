@@ -11,7 +11,11 @@ class PembayaranController extends Controller
     public function index()
     {
         $user = auth('google')->user();
-        $pendaftars = \App\Models\Pendaftar::with(['payments'])
+        $pendaftars = \App\Models\Pendaftar::with([
+                'payments', 
+                'periodePendaftaran.dokumenPendaftars', 
+                'documents'
+            ])
             ->where('google_user_id', $user?->id)
             ->orderByDesc('created_at')
             ->get();

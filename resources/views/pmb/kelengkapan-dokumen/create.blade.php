@@ -3,6 +3,30 @@
 @section('title', 'Upload Dokumen')
 
 @section('content')
+<div x-data="{ loading: false }" class="relative">
+
+    <!-- Overlay -->
+    <div 
+        x-show="loading" 
+        x-transition.opacity
+        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+        style="display: none;"
+    >
+        <div class="flex flex-col items-center">
+            <!-- Spinner -->
+            <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-40" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-90" fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                </path>
+            </svg>
+
+            <p class="text-white mt-4 text-sm">Mengupload dokumen...</p>
+        </div>
+    </div>
+    <!-- END Overlay -->
+
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-8">
         <nav class="flex" aria-label="Breadcrumb">
@@ -59,7 +83,7 @@
     <!-- Form Upload -->
     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6">
-            <form action="{{ route('pmb.dokumen.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('pmb.dokumen.store') }}" method="POST" enctype="multipart/form-data" @submit="loading = true">
                 @csrf
 
                 <!-- Pilihan Jenis Dokumen -->
@@ -192,6 +216,7 @@
             </form>
         </div>
     </div>
+</div>
 </div>
 
 <script>

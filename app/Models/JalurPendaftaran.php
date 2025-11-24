@@ -24,4 +24,16 @@ class JalurPendaftaran extends Model
     {
         return $this->hasMany(BiayaPendaftaran::class, 'jalur_pendaftaran_id');
     }
+
+    public function periodePendaftarans()
+    {
+        return $this->hasMany(PeriodePendaftaran::class, 'jalur_pendaftaran_id');
+    }
+
+    public function dokumenPendaftar()
+    {
+        return $this->belongsToMany(DokumenPendaftar::class, 'jalur_dokumen_pivot', 'jalur_pendaftaran_id', 'dokumen_pendaftar_id')
+                    ->withPivot(['is_wajib', 'catatan'])
+                    ->withTimestamps();
+    }
 }

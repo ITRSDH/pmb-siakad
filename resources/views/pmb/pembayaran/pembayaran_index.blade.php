@@ -8,6 +8,88 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Pembayaran Pendaftaran</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Daftar pendaftaran dan status pembayaran Anda.</p>
 
+            @php
+                // Check for completed payments that need document completion
+                $needDocumentCompletion = false;
+                $completedRegistrations = [];
+                
+                foreach($pendaftars as $p) {
+                    $latest = $p->payments->sortByDesc('created_at')->first();
+                    if ($latest?->status === 'confirmed') {
+                        try {
+                            // Check if documents are complete
+                            $totalRequired = 0;
+                            $uploaded = 0;
+                            
+                            if ($p->periodePendaftaran) {
+                                // Get total required documents for this periode  
+                                $totalRequired = $p->periodePendaftaran->dokumenWajib()->count();
+                                // Get uploaded documents count
+                                $uploaded = $p->documents()->count();
+                            }
+                            
+                            if ($totalRequired > 0 && $uploaded < $totalRequired) {
+                                $needDocumentCompletion = true;
+                                $completedRegistrations[] = [
+                                    'pendaftar' => $p,
+                                    'missing_docs' => $totalRequired - $uploaded,
+                                    'uploaded' => $uploaded,
+                                    'required' => $totalRequired
+                                ];
+                            }
+                        } catch (\Exception $e) {
+                            // If there's an error checking documents, skip this pendaftar
+                            \Log::error('Error checking document completion for pendaftar: ' . $p->id, ['error' => $e->getMessage()]);
+                            continue;
+                        }
+                    }
+                }
+            @endphp
+
+            @if($needDocumentCompletion)
+                <!-- Document Completion Alert -->
+                <div class="mt-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                🎉 Pembayaran Berhasil! Lengkapi Dokumen Anda
+                            </h3>
+                            <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                <p class="mb-2">Selamat! Pembayaran pendaftaran Anda telah dikonfirmasi. Silakan lengkapi dokumen yang diperlukan untuk menyelesaikan proses pendaftaran.</p>
+                                
+                                @foreach($completedRegistrations as $reg)
+                                    <div class="mb-2 p-2 bg-blue-100 dark:bg-blue-800/30 rounded border">
+                                        <p class="font-medium">{{ $reg['pendaftar']->nomor_pendaftaran }}</p>
+                                        <p class="text-xs">
+                                            Dokumen diupload: {{ $reg['uploaded'] ?? 0 }} dari {{ $reg['required'] ?? 0 }} dokumen wajib
+                                        </p>
+                                        @if(($reg['missing_docs'] ?? 0) > 0)
+                                            <p class="text-xs font-semibold text-blue-600">
+                                                Masih perlu {{ $reg['missing_docs'] }} dokumen lagi
+                                            </p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-4">
+                                <a href="{{ route('pmb.dokumen.index') }}" 
+                                   class="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-blue-900/50 dark:border-blue-600 dark:text-blue-200 dark:hover:bg-blue-900/70">
+                                    <svg class="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    Upload Dokumen Sekarang
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="mt-6 space-y-4">
                 @forelse($pendaftars as $p)
                     @php

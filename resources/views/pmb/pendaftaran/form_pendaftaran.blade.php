@@ -3,21 +3,53 @@
 @section('title', 'Form Pendaftaran')
 
 @section('content')
+<div x-data="{ loading: false }" class="relative">
+
+    <!-- Overlay Loading -->
+    <div 
+        x-show="loading"
+        x-transition.opacity
+        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+        style="display: none;"
+    >
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-40" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-90" fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            <p class="text-white mt-4 text-sm">Menyimpan data pendaftaran...</p>
+        </div>
+    </div>
+    <!-- END Overlay -->
+
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Form Pendaftaran -
-                {{ $periode->nama_periode }}</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Silakan lengkapi data diri Anda. Data dapat disimpan
-                sebagai draft terlebih dahulu.</p>
+
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Form Pendaftaran - {{ $periode->nama_periode }}
+            </h2>
+
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Silakan lengkapi data diri Anda. Data dapat disimpan sebagai draft terlebih dahulu.
+            </p>
+
             <p class="text-sm text-red-600 dark:text-red-400 mt-1">
                 <span class="text-red-500">*</span> Field wajib diisi
             </p>
 
-            <form method="POST" action="{{ route('pmb.daftar.store', $periode->id) }}" enctype="multipart/form-data" class="mt-6 space-y-4">
+            <form method="POST" action="{{ route('pmb.daftar.store', $periode->id) }}" 
+                  enctype="multipart/form-data"
+                  class="mt-6 space-y-4"
+                  @submit="loading = true">
+
                 @csrf
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Program Studi <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Program Studi <span class="text-red-500">*</span>
+                    </label>
                     <select name="prodi_id" required
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                         <option value="">-- Pilih Program Studi --</option>
@@ -33,9 +65,13 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Nama Lengkap <span class="text-red-500">*</span>
+                    </label>
                     <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" required
-                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm 
+                               focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm 
+                               dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
                     @error('nama_lengkap')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -67,13 +103,14 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">No. HP <span class="text-red-500">*</span></label>
-                        <input type="tel" name="no_hp" value="{{ old('no_hp') }}"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                            No. HP <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" name="no_hp" value="{{ old('no_hp') }}" required
                             minlength="10" maxlength="15"
                             pattern="[0-9]{10,15}"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 15);"
                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                            required
                             placeholder="Masukkan nomor HP (10-15 digit)" />
                         @error('no_hp')
                             <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
@@ -81,7 +118,9 @@
                         <p class="text-xs text-gray-500 mt-1">Nomor HP harus 10-15 digit angka</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Jenis Kelamin <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                            Jenis Kelamin <span class="text-red-500">*</span>
+                        </label>
                         <select name="jenis_kelamin" required
                             class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                             <option value="">-- Pilih --</option>
@@ -113,7 +152,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Pendidikan Terakhir <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Pendidikan Terakhir <span class="text-red-500">*</span>
+                    </label>
                     @error('pendidikan_terakhir')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -137,7 +178,9 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Sumber Informasi <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Sumber Informasi <span class="text-red-500">*</span>
+                    </label>
                     @error('sumber_informasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -151,10 +194,18 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-6">
-                    <a href="{{ route('pmb.pendaftaran.index') }}" class="text-sm text-gray-600 dark:text-gray-300">Batal</a>
-                    <button type="submit" class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Simpan & Lanjut</button>
+                    <a href="{{ route('pmb.pendaftaran.index') }}" 
+                       class="text-sm text-gray-600 dark:text-gray-300">Batal</a>
+
+                    <button type="submit" 
+                        class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
+                        Simpan & Lanjut
+                    </button>
                 </div>
+
             </form>
+
         </div>
     </div>
+</div>
 @endsection
