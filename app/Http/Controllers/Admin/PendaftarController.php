@@ -27,7 +27,17 @@ class PendaftarController extends Controller
             $query->where('periode_pendaftaran_id', $request->periode_id);
         }
 
-        $pendaftars = $query->orderByDesc('created_at')->get();
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_pendaftaran', 'like', "%{$search}%")
+                  ->orWhere('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $pendaftars = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
         
         // Ambil semua periode untuk dropdown filter
         $periodes = PeriodePendaftaran::select('id', 'nama_periode')
@@ -57,10 +67,20 @@ class PendaftarController extends Controller
             $query->where('periode_pendaftaran_id', $request->periode_id);
         }
 
-        $pendaftars = $query->orderByDesc('created_at')->get();
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_pendaftaran', 'like', "%{$search}%")
+                  ->orWhere('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $pendaftars = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
         
         // Tambahkan informasi kelengkapan dokumen
-        $pendaftars = $pendaftars->map(function ($pendaftar) {
+        $pendaftars->getCollection()->transform(function ($pendaftar) {
             $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars;
             $dokumenTerupload = $pendaftar->documents;
             
@@ -105,7 +125,17 @@ class PendaftarController extends Controller
             $query->where('periode_pendaftaran_id', $request->periode_id);
         }
 
-        $pendaftars = $query->orderByDesc('created_at')->get();
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_pendaftaran', 'like', "%{$search}%")
+                  ->orWhere('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $pendaftars = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
         
         // Ambil semua periode untuk dropdown filter
         $periodes = PeriodePendaftaran::select('id', 'nama_periode')
@@ -135,10 +165,21 @@ class PendaftarController extends Controller
             $query->where('periode_pendaftaran_id', $request->periode_id);
         }
 
-        $pendaftars = $query->orderByDesc('created_at')->get();
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_pendaftaran', 'like', "%{$search}%")
+                  ->orWhere('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Note: Karena ada filtering setelah query, kita perlu get dulu
+        $allPendaftars = $query->orderByDesc('created_at')->get();
         
         // Tambahkan informasi kelengkapan dokumen
-        $pendaftars = $pendaftars->map(function ($pendaftar) {
+        $allPendaftars = $allPendaftars->map(function ($pendaftar) {
             $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars;
             $dokumenTerupload = $pendaftar->documents;
             
@@ -161,9 +202,21 @@ class PendaftarController extends Controller
         });
         
         // Filter hanya yang dokumennya lengkap
-        $pendaftars = $pendaftars->filter(function ($pendaftar) {
+        $filtered = $allPendaftars->filter(function ($pendaftar) {
             return $pendaftar->kelengkapan_dokumen['status_kelengkapan'] === 'lengkap';
         });
+        
+        // Manual paginate filtered results
+        $perPage = 15;
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $currentItems = $filtered->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        $pendaftars = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $filtered->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
         
         // Ambil semua periode untuk dropdown filter
         $periodes = PeriodePendaftaran::select('id', 'nama_periode')

@@ -36,13 +36,23 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Filter Form -->
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+                        <div class="text-center">
+                            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-white mt-3 fw-bold">Memuat data...</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter & Search Form -->
                     <div class="row mb-4">
-                        <div class="col-md-4">
-                            <form method="GET" action="{{ route('pendaftar.dokumen.diterima') }}">
-                                <div class="form-group">
-                                    <label for="periode_id">Filter Periode:</label>
-                                    <select name="periode_id" id="periode_id" class="form-select form-control">
+                        <div class="col-md-5">
+                            <form method="GET" action="{{ route('pendaftar.dokumen.diterima') }}" id="filterForm">
+                                <label for="periode_id" class="form-label">Filter Periode</label>
+                                <div class="d-flex">
+                                    <select name="periode_id" id="periode_id" class="form-select me-2">
                                         <option value="">-- Semua Periode --</option>
                                         @foreach ($periodes as $periode)
                                             <option value="{{ $periode->id }}" {{ request('periode_id') == $periode->id ? 'selected' : '' }}>
@@ -50,8 +60,39 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
                                 </div>
                             </form>
+                        </div>
+                        <div class="col-md-5">
+                            <form method="GET" action="{{ route('pendaftar.dokumen.diterima') }}" id="searchForm">
+                                <label for="search" class="form-label">Cari Pendaftar</label>
+                                <div class="input-group">
+                                    <input type="text" name="search" id="search" class="form-control" 
+                                           placeholder="Nomor, nama, atau email..." 
+                                           value="{{ request('search') }}">
+                                    <input type="hidden" name="periode_id" value="{{ request('periode_id') }}">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    @if(request('search') || request('periode_id'))
+                                        <a href="{{ route('pendaftar.dokumen.diterima') }}" class="btn btn-secondary">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    @endif
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-2 text-end d-flex align-items-end justify-content-end">
+                            <div>
+                                <small class="text-muted d-block">Total Data</small>
+                                <h4 class="mb-0 fw-bold text-primary">{{ $pendaftars->total() }}</h4>
+                                @if(request('search'))
+                                    <small class="badge badge-info">Hasil Pencarian</small>
+                                @elseif(request('periode_id'))
+                                    <small class="badge badge-secondary">Terfilter</small>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
@@ -167,6 +208,57 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- DataTables-style Pagination -->
+                        @if($pendaftars->hasPages())
+                            <div class="row mt-4">
+                                <div class="col-sm-12 col-md-5">
+                                    <div class="dataTables_info" role="status" aria-live="polite">
+                                        Menampilkan {{ $pendaftars->firstItem() }} sampai {{ $pendaftars->lastItem() }} dari {{ $pendaftars->total() }} data
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-7">
+                                    <div class="dataTables_paginate paging_simple_numbers">
+                                        <ul class="pagination justify-content-end">
+                                            {{-- Previous Button --}}
+                                            @if ($pendaftars->onFirstPage())
+                                                <li class="paginate_button page-item previous disabled">
+                                                    <span class="page-link">Sebelumnya</span>
+                                                </li>
+                                            @else
+                                                <li class="paginate_button page-item previous">
+                                                    <a href="{{ $pendaftars->appends(request()->query())->previousPageUrl() }}" class="page-link">Sebelumnya</a>
+                                                </li>
+                                            @endif
+
+                                            {{-- Pagination Elements --}}
+                                            @foreach ($pendaftars->getUrlRange(1, $pendaftars->lastPage()) as $page => $url)
+                                                @if ($page == $pendaftars->currentPage())
+                                                    <li class="paginate_button page-item active">
+                                                        <span class="page-link">{{ $page }}</span>
+                                                    </li>
+                                                @else
+                                                    <li class="paginate_button page-item">
+                                                        <a href="{{ $pendaftars->appends(request()->query())->url($page) }}" class="page-link">{{ $page }}</a>
+                                                    </li>
+                                                @endif
+                                            @endforeach
+
+                                            {{-- Next Button --}}
+                                            @if ($pendaftars->hasMorePages())
+                                                <li class="paginate_button page-item next">
+                                                    <a href="{{ $pendaftars->appends(request()->query())->nextPageUrl() }}" class="page-link">Selanjutnya</a>
+                                                </li>
+                                            @else
+                                                <li class="paginate_button page-item next disabled">
+                                                    <span class="page-link">Selanjutnya</span>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @else
                         <div class="alert alert-info">
                             <h4>Tidak Ada Data</h4>
@@ -224,31 +316,45 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // DataTable dengan fitur minimal - Laravel pagination yang handle
             $('#basic-datatables').DataTable({
-                "pageLength": 10,
-                "searching": true,
-                "paging": true,
+                "paging": false,
+                "searching": false,
                 "ordering": true,
-                "info": true,
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
-                    "infoFiltered": "(difilter dari _MAX_ total data)",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir", 
-                        "next": "Selanjutnya",
-                        "previous": "Sebelumnya"
-                    }
-                }
+                "info": false,
+                "autoWidth": false,
+                "responsive": true,
+                "columnDefs": [
+                    { "orderable": false, "targets": [0, 8] }
+                ]
             });
 
-            // Auto submit when periode filter changes
+            // Show loading overlay function
+            function showLoading() {
+                $('#loadingOverlay').css('display', 'flex');
+            }
+
+            // Auto submit filter when periode changes
             $('#periode_id').on('change', function() {
-                $(this).closest('form').submit();
+                showLoading();
+                $('#filterForm').submit();
+            });
+
+            // Show loading on search submit
+            $('#searchForm').on('submit', function() {
+                showLoading();
+            });
+
+            // Show loading on filter form submit
+            $('#filterForm').on('submit', function() {
+                showLoading();
+            });
+
+            // Show loading when clicking pagination links
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                showLoading();
+                window.location.href = $(this).attr('href');
             });
 
             // Event delegation untuk tombol edit yang ada di dalam DataTable

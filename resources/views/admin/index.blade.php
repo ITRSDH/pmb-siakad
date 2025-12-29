@@ -9,13 +9,13 @@
         <h6 class="op-7 mb-2">Sistem Informasi Penerimaan Mahasiswa Baru</h6>
     </div>
     <div class="ms-md-auto py-2 py-md-0">
-        <a href="{{ route('jalur-pendaftaran.index') }}" class="btn btn-label-info btn-round me-2">
+        <a href="{{ route('periode-pendaftaran.index') }}" class="btn btn-label-info btn-round me-2">
             <span class="btn-label"><i class="fa fa-route"></i></span>
             Kelola PMB
         </a>
-        <a href="{{ route('biaya-pendaftaran.create') }}" class="btn btn-primary btn-round">
+        <a href="{{ route('periode-pendaftaran.create') }}" class="btn btn-primary btn-round">
             <span class="btn-label"><i class="fa fa-plus"></i></span>
-            Tambah Data
+            Tambah Periode Pendaftaran
         </a>
     </div>
 </div>

@@ -62,23 +62,24 @@ class LaporanController extends Controller
             $query->where('jenis_kelamin', $request->jenis_kelamin);
         }
 
-        $pendaftars = $query->orderByDesc('created_at')->get();
+        $pendaftars = $query->orderByDesc('created_at')->paginate(15)->withQueryString();
 
         // Ambil data untuk dropdown filter
         $periodes = PeriodePendaftaran::select('id', 'nama_periode')->orderByDesc('created_at')->get();
 
-        // Statistics
+        // Statistics - hitung dari collection untuk akurasi
+        $allPendaftars = $query->orderByDesc('created_at')->get();
         $stats = [
-            'total' => $pendaftars->count(),
-            'submitted' => $pendaftars->where('status', 'submitted')->count(),
-            'draft' => $pendaftars->where('status', 'draft')->count(),
-            'rejected' => $pendaftars->where('status', 'rejected')->count(),
-            'laki_laki' => $pendaftars->where('jenis_kelamin', 'L')->count(),
-            'perempuan' => $pendaftars->where('jenis_kelamin', 'P')->count(),
-            'lunas' => $pendaftars->filter(function($p) {
+            'total' => $allPendaftars->count(),
+            'submitted' => $allPendaftars->where('status', 'submitted')->count(),
+            'draft' => $allPendaftars->where('status', 'draft')->count(),
+            'rejected' => $allPendaftars->where('status', 'rejected')->count(),
+            'laki_laki' => $allPendaftars->where('jenis_kelamin', 'L')->count(),
+            'perempuan' => $allPendaftars->where('jenis_kelamin', 'P')->count(),
+            'lunas' => $allPendaftars->filter(function($p) {
                 return $p->payments->where('status', 'confirmed')->isNotEmpty();
             })->count(),
-            'belum_bayar' => $pendaftars->filter(function($p) {
+            'belum_bayar' => $allPendaftars->filter(function($p) {
                 return $p->payments->isEmpty();
             })->count(),
         ];
@@ -120,19 +121,20 @@ class LaporanController extends Controller
             $query->whereDate('tanggal_pembayaran', '<=', $request->tanggal_selesai);
         }
 
-        $pembayarans = $query->orderByDesc('tanggal_pembayaran')->get();
+        $pembayarans = $query->orderByDesc('tanggal_pembayaran')->paginate(15)->withQueryString();
 
         // Ambil data untuk dropdown filter
         $periodes = PeriodePendaftaran::select('id', 'nama_periode')->orderByDesc('created_at')->get();
 
-        // Statistik
+        // Statistik - hitung dari collection untuk akurasi
+        $allPembayarans = $query->orderByDesc('tanggal_pembayaran')->get();
         $stats = [
-            'total' => $pembayarans->count(),
-            'confirmed' => $pembayarans->where('status', 'confirmed')->count(),
-            'pending' => $pembayarans->where('status', 'pending')->count(),
-            'rejected' => $pembayarans->where('status', 'rejected')->count(),
-            'laki_laki' => $pembayarans->filter(function($p) { return $p->pendaftar && $p->pendaftar->jenis_kelamin == 'L'; })->count(),
-            'perempuan' => $pembayarans->filter(function($p) { return $p->pendaftar && $p->pendaftar->jenis_kelamin == 'P'; })->count(),
+            'total' => $allPembayarans->count(),
+            'confirmed' => $allPembayarans->where('status', 'confirmed')->count(),
+            'pending' => $allPembayarans->where('status', 'pending')->count(),
+            'rejected' => $allPembayarans->where('status', 'rejected')->count(),
+            'laki_laki' => $allPembayarans->filter(function($p) { return $p->pendaftar && $p->pendaftar->jenis_kelamin == 'L'; })->count(),
+            'perempuan' => $allPembayarans->filter(function($p) { return $p->pendaftar && $p->pendaftar->jenis_kelamin == 'P'; })->count(),
         ];
 
         return view('admin.laporan.index_pembayaran', compact('pembayarans', 'periodes', 'stats'));

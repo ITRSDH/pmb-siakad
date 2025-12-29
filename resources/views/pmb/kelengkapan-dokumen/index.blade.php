@@ -39,12 +39,20 @@
                     <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $pendaftar->periodePendaftaran->nama_periode }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Pembayaran</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Dokumen</label>
                     <span class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <svg class="-ml-0.5 mr-1.5 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
                             <circle cx="4" cy="4" r="3"/>
                         </svg>
-                        Dikonfirmasi
+                        @if ($pendaftar->status == 'draft')
+                            Menunggu Konfirmasi
+                        @elseif ($pendaftar->status == 'submitted')
+                            Dikonfirmasi
+                        @elseif ($pendaftar->status == 'rejected')
+                            Ditolak
+                        @else
+                            {{ ucfirst($pendaftar->status) }}
+                        @endif
                     </span>
                 </div>
             </div>

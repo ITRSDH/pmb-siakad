@@ -126,6 +126,16 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+                        <div class="text-center">
+                            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-white mt-3 fw-bold">Memuat data...</p>
+                        </div>
+                    </div>
+
                     <!-- Filter Panel -->
                     <div class="collapse {{ request()->hasAny(['periode_id', 'status', 'status_pembayaran', 'jenis_kelamin', 'tanggal_mulai', 'tanggal_selesai']) ? 'show' : '' }}" id="filterPanel">
                         <div class="card card-secondary">
@@ -235,9 +245,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($pendaftars as $p)
+                                    @foreach ($pendaftars as $index => $p)
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $pendaftars->firstItem() + $index }}</td>
                                             <td><strong>{{ $p->nomor_pendaftaran }}</strong></td>
                                             <td>{{ $p->nama_lengkap }}</td>
                                             <td>{{ $p->nik ?? '-' }}</td>
@@ -292,6 +302,57 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- DataTables-style Pagination -->
+                        @if($pendaftars->hasPages())
+                            <div class="row mt-4">
+                                <div class="col-sm-12 col-md-5">
+                                    <div class="dataTables_info" role="status" aria-live="polite">
+                                        Menampilkan {{ $pendaftars->firstItem() }} sampai {{ $pendaftars->lastItem() }} dari {{ $pendaftars->total() }} data
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-md-7">
+                                    <div class="dataTables_paginate paging_simple_numbers">
+                                        <ul class="pagination justify-content-end">
+                                            {{-- Previous Button --}}
+                                            @if ($pendaftars->onFirstPage())
+                                                <li class="paginate_button page-item previous disabled">
+                                                    <span class="page-link">Sebelumnya</span>
+                                                </li>
+                                            @else
+                                                <li class="paginate_button page-item previous">
+                                                    <a href="{{ $pendaftars->previousPageUrl() }}" class="page-link">Sebelumnya</a>
+                                                </li>
+                                            @endif
+
+                                            {{-- Pagination Elements --}}
+                                            @foreach ($pendaftars->getUrlRange(1, $pendaftars->lastPage()) as $page => $url)
+                                                @if ($page == $pendaftars->currentPage())
+                                                    <li class="paginate_button page-item active">
+                                                        <span class="page-link">{{ $page }}</span>
+                                                    </li>
+                                                @else
+                                                    <li class="paginate_button page-item">
+                                                        <a href="{{ $url }}" class="page-link">{{ $page }}</a>
+                                                    </li>
+                                                @endif
+                                            @endforeach
+
+                                            {{-- Next Button --}}
+                                            @if ($pendaftars->hasMorePages())
+                                                <li class="paginate_button page-item next">
+                                                    <a href="{{ $pendaftars->nextPageUrl() }}" class="page-link">Selanjutnya</a>
+                                                </li>
+                                            @else
+                                                <li class="paginate_button page-item next disabled">
+                                                    <span class="page-link">Selanjutnya</span>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @else
                         <div class="text-center py-5">
                             <div class="mb-3">
@@ -338,34 +399,40 @@
     </style>
     <script>
         $(document).ready(function() {
+            // DataTable dengan fitur minimal - Laravel pagination yang handle
             $('#laporanTable').DataTable({
-                "pageLength": 25,
-                "searching": true,
-                "paging": true,
+                "paging": false,
+                "searching": false,
                 "ordering": true,
-                "info": true,
+                "info": false,
                 "autoWidth": false,
                 "responsive": true,
-                "language": {
-                    "search": "Cari:",
-                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
-                    "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                    "infoEmpty": "Menampilkan 0 sampai 0 dari 0 data",
-                    "infoFiltered": "(difilter dari _MAX_ total data)",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Selanjutnya",
-                        "previous": "Sebelumnya"
-                    }
-                }
+                "columnDefs": [
+                    { "orderable": false, "targets": [0] }
+                ]
             });
 
             // Show filter panel if any filter is active
             @if(request()->hasAny(['periode_id', 'status', 'status_pembayaran', 'jenis_kelamin', 'tanggal_mulai', 'tanggal_selesai']))
                 $('#filterPanel').addClass('show');
             @endif
+        });
+
+        // Show loading overlay function
+        function showLoading() {
+            $('#loadingOverlay').css('display', 'flex');
+        }
+
+        // Show loading on filter form submit
+        $('#filterForm').on('submit', function() {
+            showLoading();
+        });
+
+        // Show loading when clicking pagination links
+        $(document).on('click', '.pagination a', function(e) {
+            e.preventDefault();
+            showLoading();
+            window.location.href = $(this).attr('href');
         });
 
         function toggleFilter() {

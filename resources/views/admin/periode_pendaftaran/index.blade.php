@@ -28,6 +28,16 @@
                 </div>
             </div>
             <div class="card-body">
+                <!-- Loading Overlay -->
+                <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+                    <div class="text-center">
+                        <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-white mt-3 fw-bold">Memuat data...</p>
+                    </div>
+                </div>
+
                 @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <strong>Berhasil!</strong> {{ session('success') }}
@@ -41,6 +51,37 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
+
+                <!-- Search Form -->
+                <div class="row mb-4">
+                    <div class="col-md-10">
+                        <form method="GET" action="{{ route('periode-pendaftaran.index') }}" id="searchForm">
+                            <label for="search" class="form-label">Cari Periode Pendaftaran</label>
+                            <div class="input-group">
+                                <input type="text" name="search" id="search" class="form-control" 
+                                       placeholder="Nama periode, gelombang, atau jalur..." 
+                                       value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Cari
+                                </button>
+                                @if(request('search'))
+                                    <a href="{{ route('periode-pendaftaran.index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Reset
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-2 text-end d-flex align-items-end justify-content-end">
+                        <div>
+                            <small class="text-muted d-block">Total Data</small>
+                            <h4 class="mb-0 fw-bold text-primary">{{ $periodePendaftarans->total() }}</h4>
+                            @if(request('search'))
+                                <small class="badge badge-info">Hasil Pencarian</small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
 
                 <div class="table-responsive">
                     <table id="periodeTable" class="display table table-striped table-hover">
@@ -177,9 +218,54 @@
                     </table>
                 </div>
 
+                <!-- DataTables-style Pagination -->
                 @if($periodePendaftarans->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $periodePendaftarans->links() }}
+                    <div class="row mt-4">
+                        <div class="col-sm-12 col-md-5">
+                            <div class="dataTables_info" role="status" aria-live="polite">
+                                Menampilkan {{ $periodePendaftarans->firstItem() }} sampai {{ $periodePendaftarans->lastItem() }} dari {{ $periodePendaftarans->total() }} data
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-7">
+                            <div class="dataTables_paginate paging_simple_numbers">
+                                <ul class="pagination justify-content-end">
+                                    {{-- Previous Button --}}
+                                    @if ($periodePendaftarans->onFirstPage())
+                                        <li class="paginate_button page-item previous disabled">
+                                            <span class="page-link">Sebelumnya</span>
+                                        </li>
+                                    @else
+                                        <li class="paginate_button page-item previous">
+                                            <a href="{{ $periodePendaftarans->appends(request()->query())->previousPageUrl() }}" class="page-link">Sebelumnya</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @foreach ($periodePendaftarans->getUrlRange(1, $periodePendaftarans->lastPage()) as $page => $url)
+                                        @if ($page == $periodePendaftarans->currentPage())
+                                            <li class="paginate_button page-item active">
+                                                <span class="page-link">{{ $page }}</span>
+                                            </li>
+                                        @else
+                                            <li class="paginate_button page-item">
+                                                <a href="{{ $periodePendaftarans->appends(request()->query())->url($page) }}" class="page-link">{{ $page }}</a>
+                                            </li>
+                                        @endif
+                                    @endforeach
+
+                                    {{-- Next Button --}}
+                                    @if ($periodePendaftarans->hasMorePages())
+                                        <li class="paginate_button page-item next">
+                                            <a href="{{ $periodePendaftarans->appends(request()->query())->nextPageUrl() }}" class="page-link">Selanjutnya</a>
+                                        </li>
+                                    @else
+                                        <li class="paginate_button page-item next disabled">
+                                            <span class="page-link">Selanjutnya</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -197,29 +283,43 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
+    // DataTable dengan fitur minimal - Laravel pagination yang handle
     $('#periodeTable').DataTable({
-        "pageLength": 10,
-        "searching": true,
-        "paging": true,
+        "paging": false,
+        "searching": false,
         "ordering": true,
-        "info": true,
+        "info": false,
         "autoWidth": false,
         "responsive": true,
         "columnDefs": [
-            { "orderable": false, "targets": [8] }, // Disable sorting on action column
-            { "width": "5%", "targets": [0] },     // No column
-            { "width": "20%", "targets": [1] },    // Nama Periode
-            { "width": "10%", "targets": [2] },    // Gelombang
-            { "width": "15%", "targets": [3] },    // Jalur
-            { "width": "15%", "targets": [4] },    // Tanggal
-            { "width": "10%", "targets": [5] },    // Biaya
-            { "width": "10%", "targets": [6] },    // Kuota
-            { "width": "10%", "targets": [7] },    // Status
-            { "width": "10%", "targets": [8] }     // Aksi
-        ],
-        "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
-        }
+            { "orderable": false, "targets": [0, 8] },
+            { "width": "5%", "targets": [0] },
+            { "width": "20%", "targets": [1] },
+            { "width": "10%", "targets": [2] },
+            { "width": "15%", "targets": [3] },
+            { "width": "15%", "targets": [4] },
+            { "width": "10%", "targets": [5] },
+            { "width": "10%", "targets": [6] },
+            { "width": "10%", "targets": [7] },
+            { "width": "10%", "targets": [8] }
+        ]
+    });
+
+    // Show loading overlay function
+    function showLoading() {
+        $('#loadingOverlay').css('display', 'flex');
+    }
+
+    // Show loading on search submit
+    $('#searchForm').on('submit', function() {
+        showLoading();
+    });
+
+    // Show loading when clicking pagination links
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        showLoading();
+        window.location.href = $(this).attr('href');
     });
 });
 

@@ -19,11 +19,29 @@ class PeriodePendaftaranController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $periodePendaftarans = PeriodePendaftaran::with(['gelombang', 'jalurPendaftaran', 'biayaPendaftaran'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = PeriodePendaftaran::with(['gelombang', 'jalurPendaftaran', 'biayaPendaftaran']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_periode', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%")
+                  ->orWhereHas('gelombang', function($q2) use ($search) {
+                      $q2->where('nama_gelombang', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('jalurPendaftaran', function($q2) use ($search) {
+                      $q2->where('nama_jalur', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $periodePendaftarans = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+            
         return view('admin.periode_pendaftaran.index', compact('periodePendaftarans'));
     }
 
