@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DokumenPendaftar;
 use App\Models\Pendaftar;
 use App\Models\PeriodePendaftaran;
 use Illuminate\Http\Request;
@@ -252,13 +253,15 @@ class PendaftarController extends Controller
             
             return [
                 'id' => $dokumen->id,
+                'pendaftar_document_id' => $uploadedDoc ? $uploadedDoc->id : null,
                 'nama_dokumen' => $dokumen->nama_dokumen,
                 'is_wajib' => $dokumen->pivot->is_wajib,
                 'catatan' => $dokumen->pivot->catatan,
                 'is_uploaded' => $isUploaded,
                 'uploaded_at' => $uploadedDoc ? $uploadedDoc->created_at : null,
                 'file_path' => $uploadedDoc ? $uploadedDoc->alamat_dokumen : null,
-                'file_note' => $uploadedDoc ? $uploadedDoc->catatan : null
+                'file_note' => $uploadedDoc ? $uploadedDoc->catatan : null,
+                'status_dokumen' => $uploadedDoc ? $uploadedDoc->status_dokumen : null
             ];
         });
 
@@ -291,7 +294,7 @@ class PendaftarController extends Controller
         return redirect()->back()->with('success', $message);
     }
 
-    public function updateStatusDokumen(Request $request, $id)
+    public function updateStatusPendaftaran(Request $request, $id)
     {
         $request->validate([
             'status' => 'required|in:draft,submitted,rejected',
@@ -304,6 +307,23 @@ class PendaftarController extends Controller
         $pendaftar->save();
 
         $message = 'Status dokumen pendaftar berhasil diupdate menjadi ' . ucfirst($request->status);
+        
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function updateStatusDokumenPendaftar(Request $request, $id)
+    {
+        $request->validate([
+            'status_dokumen' => 'required|in:disetujui,ditolak,menunggu',
+        ]);
+
+        $dokumenPendaftar = \App\Models\PendaftarDocuments::findOrFail($id);
+
+        // Update status dokumen pendaftar
+        $dokumenPendaftar->status_dokumen = $request->status_dokumen;
+        $dokumenPendaftar->save();
+
+        $message = 'Status dokumen pendaftar berhasil diupdate menjadi ' . ucfirst($request->status_dokumen);
         
         return redirect()->back()->with('success', $message);
     }
