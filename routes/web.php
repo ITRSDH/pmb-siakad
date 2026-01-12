@@ -108,6 +108,9 @@ Route::prefix('mahasiswa')->group(function () {
             'update' => 'pmb.dokumen.update',
             'destroy' => 'pmb.dokumen.destroy'
         ]);
+
+    // Webhook for Payment Status Update
+    Route::post('/webhook/payment-status', [PembayaranController::class, 'handleWebhook'])->name('webhook.payment.status');
 });
 
 // Halaman login admin

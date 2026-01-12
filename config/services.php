@@ -40,5 +40,9 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
+    'internal_api' => [
+        'key'    => env('INTERNAL_API_KEY'),
+        'secret' => env('INTERNAL_API_SECRET'),
+    ],
 
 ];

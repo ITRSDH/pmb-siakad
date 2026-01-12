@@ -249,7 +249,13 @@
                                 <a class="dropdown-item" href="#">Profile Saya</a>
                                 <a class="dropdown-item" href="#">Pengaturan Akun</a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">Logout</a>
+                                <form method="POST" action="{{ route('admin.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item w-100 text-start">
+                                        Logout
+                                    </button>
+                                </form>
+
                             </li>
                         </div>
                     </ul>
