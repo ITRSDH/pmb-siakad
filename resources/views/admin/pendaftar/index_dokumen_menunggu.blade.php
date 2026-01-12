@@ -107,7 +107,7 @@
                                         <th>Email</th>
                                         <th>Periode</th>
                                         <th>Kelengkapan Dokumen</th>
-                                        <th>Status Dokumen</th>
+                                        <th>Status Pendaftaran</th>
                                         <th>Status Pembayaran</th>
                                         <th>Tanggal Daftar</th>
                                         <th>Aksi</th>
@@ -393,7 +393,7 @@
                 document.getElementById('statusPendaftaran').value = status || 'draft';
                 
                 // Set action form
-                var routeTemplate = "{{ route('pendaftar.update-status-dokumen', ['id' => ':id']) }}";
+                var routeTemplate = "{{ route('pendaftar.update-status-pendaftaran', ['id' => ':id']) }}";
                 var actionUrl = routeTemplate.replace(':id', id);
                 document.getElementById('formUbahStatus').action = actionUrl;
                 

@@ -377,7 +377,7 @@
                 document.getElementById('statusPendaftaran').value = status || 'draft';
                 
                 // Set action form
-                var routeTemplate = "{{ route('pendaftar.update-status-dokumen', ['id' => ':id']) }}";
+                var routeTemplate = "{{ route('pendaftar.update-status-pendaftaran', ['id' => ':id']) }}";
                 var actionUrl = routeTemplate.replace(':id', id);
                 document.getElementById('formUbahStatus').action = actionUrl;
                 

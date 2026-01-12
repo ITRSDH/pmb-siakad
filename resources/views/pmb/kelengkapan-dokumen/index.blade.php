@@ -39,8 +39,17 @@
                     <p class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $pendaftar->periodePendaftaran->nama_periode }}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Dokumen</label>
-                    <span class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Pendaftaran</label>
+                    @php
+                        $statusPendaftar = $pendaftar->status;
+                        $bgColor = match ($statusPendaftar) {
+                            'draft' => 'bg-yellow-100',
+                            'submitted' => 'bg-green-100',
+                            'rejected' => 'bg-red-100',
+                            default => 'bg-gray-200',
+                        };
+                    @endphp
+                    <span class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $bgColor }}">
                         <svg class="-ml-0.5 mr-1.5 h-2 w-2" fill="currentColor" viewBox="0 0 8 8">
                             <circle cx="4" cy="4" r="3"/>
                         </svg>
@@ -96,10 +105,24 @@
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
                                 @if($uploaded)
-                                    <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
+                                    @if($uploaded->status_dokumen == 'disetujui')
+                                        <!-- Icon centang hijau untuk disetujui -->
+                                        <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    @elseif($uploaded->status_dokumen == 'ditolak')
+                                        <!-- Icon silang merah untuk ditolak -->
+                                        <svg class="h-8 w-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    @else
+                                        <!-- Icon jam untuk menunggu -->
+                                        <svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    @endif
                                 @else
+                                    <!-- Icon tanda tanya untuk belum upload -->
                                     <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
@@ -124,11 +147,21 @@
                                     </div>
                                 @endif
                                 @if($uploaded)
-                                    <div class="text-xs text-green-600 dark:text-green-400 mt-1">
-                                        ✓ Sudah diupload pada {{ $uploaded->created_at->format('d M Y H:i') }}
-                                    </div>
+                                    @if($uploaded->status_dokumen == 'disetujui')
+                                        <div class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                            ✓ Disetujui pada {{ $uploaded->updated_at->format('d M Y H:i') }}
+                                        </div>
+                                    @elseif($uploaded->status_dokumen == 'ditolak')
+                                        <div class="text-xs text-red-600 dark:text-red-400 mt-1">
+                                            ✗ Ditolak pada {{ $uploaded->updated_at->format('d M Y H:i') }}
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                            ⏱ Menunggu verifikasi - Upload pada {{ $uploaded->created_at->format('d M Y H:i') }}
+                                        </div>
+                                    @endif
                                 @else
-                                    <div class="text-xs text-red-600 dark:text-red-400 mt-1">
+                                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
                                         ⚠ Belum diupload
                                     </div>
                                 @endif

@@ -212,6 +212,7 @@
                                         <th>Catatan Periode</th>
                                         <th>Tanggal Upload</th>
                                         <th>Catatan Upload</th>
+                                        <th>Status Dokumen</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -261,11 +262,26 @@
                                                 </small>
                                             </td>
                                             <td>
+                                                @if ($dokumen['status_dokumen'] == 'disetujui')
+                                                    <span class="badge badge-success">Disetujui</span>
+                                                @elseif ($dokumen['status_dokumen'] == 'ditolak')
+                                                    <span class="badge badge-danger">Ditolak</span>
+                                                @else
+                                                    <span class="badge badge-warning">Menunggu</span>
+                                                @endif
+                                            </td>
+                                            <td>
                                                 @if ($dokumen['is_uploaded'] && $dokumen['file_path'])
                                                     <a href="{{ asset('storage/' . $dokumen['file_path']) }}"
                                                         target="_blank" class="btn btn-sm btn-primary">
                                                         <i class="fa fa-eye"></i> Lihat
                                                     </a>
+                                                    @if ($dokumen['is_uploaded'])
+                                                        <button type="button" class="btn btn-sm btn-info ms-1" 
+                                                                onclick="openStatusModal('{{ $dokumen['pendaftar_document_id'] }}', '{{ $dokumen['status_dokumen'] ?? 'menunggu' }}', '{{ $dokumen['nama_dokumen'] }}')">
+                                                            <i class="fa fa-edit"></i> Status
+                                                        </button>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
@@ -331,4 +347,68 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Update Status Dokumen -->
+    <div class="modal fade" id="statusDokumenModal" tabindex="-1" aria-labelledby="statusDokumenModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusDokumenModalLabel">Update Status Dokumen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formUpdateStatusDokumen" method="POST" action="">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-body">
+                        <input type="hidden" id="dokumen_id" name="dokumen_id">
+                        
+                        <div class="mb-3">
+                            <label for="nama_dokumen_display" class="form-label">Nama Dokumen</label>
+                            <input type="text" id="nama_dokumen_display" class="form-control" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status_dokumen" class="form-label">Status Dokumen</label>
+                            <select id="status_dokumen" name="status_dokumen" class="form-select" required>
+                                <option value="menunggu">Menunggu</option>
+                                <option value="disetujui">Disetujui</option>
+                                <option value="ditolak">Ditolak</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fungsi untuk membuka modal
+    window.openStatusModal = function(dokumenId, currentStatus, namaDokumen) {
+        // Set nilai form
+        console.log('Dokumen ID:', dokumenId); // Debug
+        document.getElementById('dokumen_id').value = dokumenId;
+        document.getElementById('nama_dokumen_display').value = namaDokumen;
+        document.getElementById('status_dokumen').value = currentStatus;
+        
+        // Set action form dengan JSON encode untuk menghindari error
+        var routeTemplate = @json(route('pendaftar.update-status-dokumen-pendaftar', ['id' => ':id']));
+        var actionUrl = routeTemplate.replace(':id', dokumenId);
+        console.log('Action URL:', actionUrl); // Debug
+        document.getElementById('formUpdateStatusDokumen').action = actionUrl;
+        
+        // Show modal
+        var modalEl = document.getElementById('statusDokumenModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    };
+});
+</script>
+@endpush

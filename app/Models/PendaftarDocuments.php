@@ -22,6 +22,7 @@ class PendaftarDocuments extends Model
         'dokumen_pendaftar_id',
         'alamat_dokumen',
         'catatan',  
+        'status_dokumen'
     ];
 
     protected $casts = [

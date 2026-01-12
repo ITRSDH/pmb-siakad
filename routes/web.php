@@ -138,7 +138,10 @@ Route::middleware('admin')->group(function () {
     Route::patch('/admin/pendaftar/{id}/update-status-pembayaran', [PendaftarController::class, 'updateStatusPembayaran'])->name('pendaftar.update-status-pembayaran');
     
     // PATCH route untuk update status dokumen (admin) - khusus menu dokumen
-    Route::patch('/admin/pendaftar/{id}/update-status-dokumen', [PendaftarController::class, 'updateStatusDokumen'])->name('pendaftar.update-status-dokumen');
+    Route::patch('/admin/pendaftar/{id}/update-status-pendaftaran', [PendaftarController::class, 'updateStatusPendaftaran'])->name('pendaftar.update-status-pendaftaran');
+    
+    // PATCH route untuk update status dokumen pendaftar (admin) - khusus detail dokumen
+    Route::patch('/admin/pendaftar/update-status-dokumen-pendaftar/{id}', [PendaftarController::class, 'updateStatusDokumenPendaftar'])->name('pendaftar.update-status-dokumen-pendaftar');
 
     // AJAX Routes for dynamic dropdowns
     Route::get('/ajax/biaya-by-jalur', [PeriodePendaftaranController::class, 'getBiayaByJalur'])->name('ajax.biaya-by-jalur');

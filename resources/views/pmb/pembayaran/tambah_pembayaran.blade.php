@@ -104,7 +104,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-1">Bukti Pembayaran
-                        (PDF/JPG/PNG)</label>
+                        (PDF/JPG/PNG) Max 5MB</label>
                     <input type="file" required name="bukti_pembayaran"
                         accept=".pdf,.jpg,.jpeg,.png"
                         class="w-full text-sm border rounded-md bg-white dark:bg-gray-800" />
