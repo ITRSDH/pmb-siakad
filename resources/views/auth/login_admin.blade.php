@@ -107,6 +107,13 @@
                                         </div>
                                     @endif
 
+                                    @if(session('error'))
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <strong>Login Gagal!</strong> {{ session('error') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    @endif
+
                                     <form method="POST" action="{{ route('admin.login') }}">
                                         @csrf
                                         
@@ -151,9 +158,15 @@
                                         </div>
 
                                         <div class="d-grid mb-3">
-                                            <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="fas fa-sign-in-alt me-2"></i>
-                                                Masuk ke Admin Panel
+                                            <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+                                                <span id="loginText">
+                                                    <i class="fas fa-sign-in-alt me-2"></i>
+                                                    Masuk ke Admin Panel
+                                                </span>
+                                                <span id="loginLoading" style="display: none;">
+                                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                    Sedang masuk...
+                                                </span>
                                             </button>
                                         </div>
                                     </form>
@@ -184,6 +197,36 @@
             const emailInput = document.getElementById('email');
             if (emailInput) emailInput.focus();
         });
+
+        // Handle login form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginLoading = document.getElementById('loginLoading');
+            
+            // Disable button and show loading
+            loginBtn.disabled = true;
+            loginText.style.display = 'none';
+            loginLoading.style.display = 'inline';
+            
+            // Prevent double submission
+            setTimeout(() => {
+                loginBtn.disabled = true;
+            }, 100);
+        });
+
+        // Re-enable button if there are validation errors
+        @if ($errors->any())
+            document.addEventListener('DOMContentLoaded', function() {
+                const loginBtn = document.getElementById('loginBtn');
+                const loginText = document.getElementById('loginText');
+                const loginLoading = document.getElementById('loginLoading');
+                
+                loginBtn.disabled = false;
+                loginText.style.display = 'inline';
+                loginLoading.style.display = 'none';
+            });
+        @endif
     </script>
 </body>
 </html>

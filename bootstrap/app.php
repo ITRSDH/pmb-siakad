@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'redirect.if.authenticated' => \App\Http\Middleware\RedirectIfMultiAuthenticated::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'api.auth' => \App\Http\Middleware\ApiAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

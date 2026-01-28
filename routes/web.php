@@ -121,18 +121,19 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Master Data PMB Routes
-Route::middleware('admin')->group(function () {
+Route::middleware('api.auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::resource('jalur-pendaftaran', JalurPendaftaranController::class);
     Route::resource('gelombang', GelombangController::class);
     Route::resource('biaya-pendaftaran', BiayaPendaftaranController::class);
+    Route::get('prodi/sync', [ProdiController::class, 'sync'])->name('prodi.sync');
     Route::resource('prodi', ProdiController::class);
     Route::resource('periode-pendaftaran', PeriodePendaftaranController::class);
     Route::resource('dokumen-pendaftar', DokumenPendaftarController::class);
 
-    Route::get('/pendaftar/pembayaran/menunggu', [PendaftarController::class, 'indexPembayaranMenunggu'])->name('pendaftar.pembayaran.menunggu');
-    Route::get('/pendaftar/pembayaran/diterima', [PendaftarController::class, 'indexPembayaranDiterima'])->name('pendaftar.pembayaran.diterima');
+    // Route::get('/pendaftar/pembayaran/menunggu', [PendaftarController::class, 'indexPembayaranMenunggu'])->name('pendaftar.pembayaran.menunggu');
+    // Route::get('/pendaftar/pembayaran/diterima', [PendaftarController::class, 'indexPembayaranDiterima'])->name('pendaftar.pembayaran.diterima');
     Route::get('/pendaftar/dokumen/menunggu', [PendaftarController::class, 'indexDokumenMenunggu'])->name('pendaftar.dokumen.menunggu');
     Route::get('/pendaftar/dokumen/diterima', [PendaftarController::class, 'indexDokumenDiterima'])->name('pendaftar.dokumen.diterima');
     Route::get('/pendaftar/{id}', [PendaftarController::class, 'show'])->name('pendaftar.show');
@@ -151,9 +152,9 @@ Route::middleware('admin')->group(function () {
 
     // Laporan Routes
     Route::prefix('admin/laporan')->name('admin.laporan.')->group(function () {
-        Route::get('/pendaftar', [LaporanController::class, 'indexPendaftar'])->name('pendaftar');
-        Route::get('/pendaftar/export', [LaporanController::class, 'exportPendaftar'])->name('pendaftar.export');
-        Route::get('/pembayaran', [LaporanController::class, 'indexPembayaran'])->name('pembayaran');
-        Route::get('/pembayaran/export', [LaporanController::class, 'exportPembayaran'])->name('pembayaran.export');
+        Route::get('/', [LaporanController::class, 'indexAll'])->name('index_all');
+        Route::get('/export', [LaporanController::class, 'exportAll'])->name('export_all');
+        Route::get('/export-excel', [LaporanController::class, 'exportAllExcel'])->name('export_all_excel');
+        Route::get('/{id}', [LaporanController::class, 'show'])->name('show_all');
     });
 });

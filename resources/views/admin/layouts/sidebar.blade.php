@@ -105,29 +105,6 @@
                     <h4 class="text-section">Registrasi</h4>
                 </li>
 
-                <!-- Pembayaran -->
-                <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#pembayaran">
-                        <i class="fas fa-users"></i>
-                        <p>Data Pembayaran</p>
-                        <span class="caret"></span>
-                    </a>
-                    <div class="collapse" id="pembayaran">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a href="{{ route('pendaftar.pembayaran.menunggu') }}">
-                                    <span class="sub-item">Pembayaran Menunggu</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('pendaftar.pembayaran.diterima') }}">
-                                    <span class="sub-item">Pembayaran Diterima</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-
                 <!-- Dokumen -->
                 <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#dokumen">
@@ -137,9 +114,14 @@
                     </a>
                     <div class="collapse" id="dokumen">
                         <ul class="nav nav-collapse">
-                            <li>
+                            <li class="position-relative">
                                 <a href="{{ route('pendaftar.dokumen.menunggu') }}">
                                     <span class="sub-item">Dokumen Menunggu</span>
+                                    @if($dokumenMenungguCount > 0)
+                                        <span class="badge bg-danger position-absolute" style="top: 8px; right: 10px; font-size: 0.65em; padding: 2px 6px; min-width: 18px; text-align: center;">
+                                            {{ $dokumenMenungguCount > 99 ? '99+' : $dokumenMenungguCount }}
+                                        </span>
+                                    @endif
                                 </a>
                             </li>
                             <li>
@@ -160,30 +142,10 @@
                 </li>
 
                 <li class="nav-item {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
-                    <a data-bs-toggle="collapse" href="#reports">
+                    <a href="{{ route('admin.laporan.index_all') }}">
                         <i class="fas fa-chart-bar"></i>
                         <p>Laporan PMB</p>
-                        <span class="caret"></span>
                     </a>
-                    <div class="collapse {{ request()->routeIs('admin.laporan*') ? 'show' : '' }}" id="reports">
-                        <ul class="nav nav-collapse">
-                            <li>
-                                <a href="{{ route('admin.laporan.pendaftar') }}">
-                                    <span class="sub-item">Laporan Pendaftar</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.laporan.pembayaran') }}">
-                                    <span class="sub-item">Laporan Pembayaran</span>
-                                </a>
-                            </li>
-                            {{-- <li>
-                                <a href="#">
-                                    <span class="sub-item">Laporan Per Gelombang</span>
-                                </a>
-                            </li> --}}
-                        </ul>
-                    </div>
                 </li>
 
                 <!-- Divider -->

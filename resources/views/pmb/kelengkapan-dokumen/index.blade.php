@@ -155,6 +155,12 @@
                                         <div class="text-xs text-red-600 dark:text-red-400 mt-1">
                                             ✗ Ditolak pada {{ $uploaded->updated_at->format('d M Y H:i') }}
                                         </div>
+                                        @if($uploaded->catatan_admin)
+                                            <div class="text-xs text-orange-600 dark:text-orange-400 mt-1 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                                Catatan Admin: {{ $uploaded->catatan_admin }}
+                                            </div>
+                                        @endif
                                     @else
                                         <div class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
                                             ⏱ Menunggu verifikasi - Upload pada {{ $uploaded->created_at->format('d M Y H:i') }}
@@ -172,10 +178,12 @@
                                 <a href="{{ route('pmb.dokumen.show', $uploaded) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                     Lihat
                                 </a>
-                                <span class="text-gray-300">|</span>
-                                <a href="{{ route('pmb.dokumen.edit', $uploaded) }}" class="text-yellow-600 hover:text-yellow-900 text-sm font-medium">
-                                    Ganti
-                                </a>
+                                @if($uploaded->status_dokumen !== 'disetujui')
+                                    <span class="text-gray-300">|</span>
+                                    <a href="{{ route('pmb.dokumen.edit', $uploaded) }}" class="text-yellow-600 hover:text-yellow-900 text-sm font-medium">
+                                        Ganti
+                                    </a>
+                                @endif
                             @else
                                 <a href="{{ route('pmb.dokumen.create', ['dokumen' => $dokumen->id]) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                     Upload
@@ -246,18 +254,20 @@
                                     <a href="{{ route('pmb.dokumen.show', $document) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                         Lihat
                                     </a>
-                                    <span class="text-gray-300">|</span>
-                                    <a href="{{ route('pmb.dokumen.edit', $document) }}" class="text-yellow-600 hover:text-yellow-900 text-sm font-medium">
-                                        Edit
-                                    </a>
-                                    <span class="text-gray-300">|</span>
-                                    <form action="{{ route('pmb.dokumen.destroy', $document) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-medium" onclick="return confirm('Yakin ingin menghapus dokumen ini?')">
-                                            Hapus
-                                        </button>
-                                    </form>
+                                    @if($document->status_dokumen !== 'disetujui')
+                                        <span class="text-gray-300">|</span>
+                                        <a href="{{ route('pmb.dokumen.edit', $document) }}" class="text-yellow-600 hover:text-yellow-900 text-sm font-medium">
+                                            Edit
+                                        </a>
+                                        <span class="text-gray-300">|</span>
+                                        <form action="{{ route('pmb.dokumen.destroy', $document) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-medium" onclick="return confirm('Yakin ingin menghapus dokumen ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

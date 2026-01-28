@@ -311,7 +311,7 @@
                         <input type="hidden" id="modalPendaftarId" name="pendaftar_id">
                         
                         <div class="mb-3">
-                            <label for="statusPendaftaran" class="form-label">Status Dokumen</label>
+                            <label for="statusPendaftaran" class="form-label">Status Pendaftar</label>
                             <select class="form-select" id="statusPendaftaran" name="status" required>
                                 <option value="draft">Draft</option>
                                 <option value="submitted">Submitted</option>

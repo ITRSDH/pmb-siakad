@@ -7,11 +7,14 @@
     <div>
         <h3 class="fw-bold mb-3">Program Studi</h3>
         <h6 class="op-7 mb-2">Kelola data program studi</h6>
+        @if($lastSync)
+            <small class="text-muted"><i class="fas fa-sync-alt me-1"></i>Sync terakhir: {{ $lastSync }}</small>
+        @endif
     </div>
     <div class="ms-md-auto py-2 py-md-0">
-        <a href="{{ route('prodi.create') }}" class="btn btn-primary btn-round">
-            <span class="btn-label"><i class="fa fa-plus"></i></span>
-            Tambah Program Studi
+        <a href="{{ route('prodi.sync') }}" class="btn btn-info btn-round" onclick="return confirm('Sync data dari API? Ini akan memperbarui data program studi.')">
+            <span class="btn-label"><i class="fas fa-sync-alt"></i></span>
+            Sync Data
         </a>
     </div>
 </div>
@@ -117,10 +120,10 @@
                             <i class="fas fa-university fa-5x text-muted"></i>
                         </div>
                         <h4 class="text-muted mb-3">Belum ada data program studi</h4>
-                        <p class="text-muted mb-4">Mulai dengan menambahkan program studi pertama untuk sistem PMB.</p>
-                        <a href="{{ route('prodi.create') }}" class="btn btn-primary btn-round">
-                            <span class="btn-label"><i class="fa fa-plus"></i></span>
-                            Tambah Program Studi
+                        <p class="text-muted mb-4">Sync data dari API untuk mengisi program studi.</p>
+                        <a href="{{ route('prodi.sync') }}" class="btn btn-info btn-round" onclick="return confirm('Sync data dari API? Ini akan memperbarui data program studi.')">
+                            <span class="btn-label"><i class="fas fa-sync-alt"></i></span>
+                            Sync Data
                         </a>
                     </div>
                 @endif

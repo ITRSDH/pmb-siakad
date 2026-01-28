@@ -212,7 +212,7 @@
                         <div class="card card-light bg-info-gradient">
                             <div class="card-body pb-0">
                                 <div class="h1 text-white">
-                                    <i class="fas fa-water"></i>
+                                    <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <h2 class="mb-2 fw-bold text-white">Gelombang</h2>
                                 <p class="text-white">Kelola gelombang pendaftaran</p>

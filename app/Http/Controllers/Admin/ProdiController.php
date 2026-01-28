@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Prodi;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class ProdiController extends Controller
 {
@@ -16,7 +20,75 @@ class ProdiController extends Controller
     public function index(): View
     {
         $prodis = Prodi::latest()->paginate(10);
-        return view('admin.prodi.index', compact('prodis'));
+        $lastSync = session('last_prodi_sync');
+        return view('admin.prodi.index', compact('prodis', 'lastSync'));
+    }
+
+    /**
+     * Sync data from API
+     */
+    public function sync(): RedirectResponse
+    {
+        try {
+            // Get data from API
+            $apiUrl = Config::get('api.base_url') . 'landing/prodi';
+            Log::info('Attempting to sync from: ' . $apiUrl);
+            
+            $response = Http::get($apiUrl);
+            
+            Log::info('API Response Status: ' . $response->status());
+            
+            if (!$response->successful()) {
+                Log::error('API Sync Failed: ' . $response->body());
+                return redirect()->route('prodi.index')->with('error', 'Gagal menghubungi API server!');
+            }
+
+            $data = $response->json();
+            
+            if (!$data['status'] || !isset($data['data'])) {
+                return redirect()->route('prodi.index')->with('error', 'Format response API tidak valid!');
+            }
+
+            $apiProdis = $data['data'];
+            $syncCount = 0;
+            $updateCount = 0;
+
+            DB::beginTransaction();
+            
+            foreach ($apiProdis as $apiProdi) {
+                // Check if prodi exists by kode_prodi
+                $existingProdi = Prodi::where('kode_prodi', $apiProdi['kode_prodi'])->first();
+                
+                // Only sync fields that exist in table
+                $prodiData = [
+                    'nama_prodi' => $apiProdi['nama_prodi'],
+                    'kode_prodi' => $apiProdi['kode_prodi'],
+                    'deskripsi' => null, // API doesn't have deskripsi field, set to null
+                ];
+
+                if ($existingProdi) {
+                    // Update existing prodi
+                    $existingProdi->update($prodiData);
+                    $updateCount++;
+                } else {
+                    // Create new prodi
+                    Prodi::create($prodiData);
+                    $syncCount++;
+                }
+            }
+
+            DB::commit();
+
+            // Store last sync time
+            session(['last_prodi_sync' => now()->format('d M Y H:i:s')]);
+
+            $message = "Sync berhasil! {$syncCount} data baru, {$updateCount} data diperbarui.";
+            return redirect()->route('prodi.index')->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('prodi.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -261,7 +261,8 @@ class PendaftarController extends Controller
                 'uploaded_at' => $uploadedDoc ? $uploadedDoc->created_at : null,
                 'file_path' => $uploadedDoc ? $uploadedDoc->alamat_dokumen : null,
                 'file_note' => $uploadedDoc ? $uploadedDoc->catatan : null,
-                'status_dokumen' => $uploadedDoc ? $uploadedDoc->status_dokumen : null
+                'status_dokumen' => $uploadedDoc ? $uploadedDoc->status_dokumen : null,
+                'catatan_admin' => $uploadedDoc ? $uploadedDoc->catatan_admin : null
             ];
         });
 
@@ -315,12 +316,14 @@ class PendaftarController extends Controller
     {
         $request->validate([
             'status_dokumen' => 'required|in:disetujui,ditolak,menunggu',
+            'catatan_admin' => 'nullable|string|max:255',
         ]);
 
         $dokumenPendaftar = \App\Models\PendaftarDocuments::findOrFail($id);
 
         // Update status dokumen pendaftar
         $dokumenPendaftar->status_dokumen = $request->status_dokumen;
+        $dokumenPendaftar->catatan_admin = $request->catatan_admin;
         $dokumenPendaftar->save();
 
         $message = 'Status dokumen pendaftar berhasil diupdate menjadi ' . ucfirst($request->status_dokumen);

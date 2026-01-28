@@ -54,6 +54,22 @@
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
+        
+        /* Badge notifikasi untuk sidebar */
+        .nav-collapse .nav-item .sub-item {
+            position: relative;
+        }
+        .nav-collapse .nav-item .badge {
+            position: absolute;
+            top: 50%;
+            right: -15px;
+            transform: translateY(-50%);
+            font-size: 0.65em;
+            padding: 2px 6px;
+            min-width: 18px;
+            text-align: center;
+            z-index: 10;
+        }
     </style>
 
     @stack('styles')

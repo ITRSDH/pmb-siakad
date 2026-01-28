@@ -65,8 +65,26 @@
                         <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
                             <p><strong>File:</strong> {{ basename($dokumen->alamat_dokumen) }}</p>
                             <p><strong>Diupload:</strong> {{ $dokumen->created_at->format('d F Y H:i') }}</p>
+                            <p><strong>Status:</strong> 
+                                @if($dokumen->status_dokumen === 'disetujui')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        ✓ Disetujui
+                                    </span>
+                                @elseif($dokumen->status_dokumen === 'ditolak')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        ✗ Ditolak
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        ⏱ Menunggu Persetujuan
+                                    </span>
+                                @endif
+                            </p>
                             @if ($dokumen->catatan)
                                 <p><strong>Catatan:</strong> {{ $dokumen->catatan }}</p>
+                            @endif
+                            @if($dokumen->status_dokumen === 'ditolak' && $dokumen->catatan_admin)
+                                <p><strong>Catatan Admin:</strong> {{ $dokumen->catatan_admin }}</p>
                             @endif
                         </div>
                         <div class="mt-3">
@@ -78,6 +96,26 @@
                     </div>
                 </div>
             </div>
+
+            @if($dokumen->status_dokumen === 'ditolak')
+                <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-orange-800 dark:text-orange-200">Perhatian</h3>
+                            <div class="mt-2 text-sm text-orange-700 dark:text-orange-300">
+                                <p>Dokumen Anda ditolak. Setelah mengganti file, status akan otomatis berubah menjadi "Menunggu Persetujuan" untuk diverifikasi kembali.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
@@ -93,14 +131,14 @@
                             </label>
                             <div class="mt-1">
                                 <input type="file" name="alamat_dokumen" id="alamat_dokumen"
-                                    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                                    accept=".jpg,.jpeg,.png,.pdf"
                                     class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                             </div>
                             @error('alamat_dokumen')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                Kosongkan jika tidak ingin mengubah file. Format yang didukung: JPG, PNG, PDF, DOC, DOCX.
+                                Kosongkan jika tidak ingin mengubah file. Format yang didukung: JPG, PNG, PDF.
                                 Maksimal 5MB.
                             </p>
                         </div>

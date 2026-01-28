@@ -248,11 +248,18 @@ class KelengkapanDokumenController extends Controller
                 
                 $updateData['alamat_dokumen'] = $path;
                 
+                // Reset status ke "menunggu" jika sebelumnya "ditolak"
+                if ($dokumen->status_dokumen === 'ditolak') {
+                    $updateData['status_dokumen'] = 'menunggu';
+                    $updateData['catatan_admin'] = null; // Hapus catatan admin lama
+                }
+                
                 Log::info('File dokumen diperbarui', [
                     'dokumen_id' => $dokumen->id,
                     'dokumen_pendaftar_id' => $dokumen->dokumen_pendaftar_id,
                     'old_path' => $dokumen->alamat_dokumen,
                     'new_path' => $path,
+                    'status_changed' => $dokumen->status_dokumen === 'ditolak' ? 'ditolak -> menunggu' : 'no change',
                 ]);
             }
 

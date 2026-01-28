@@ -12,6 +12,11 @@ class RedirectIfMultiAuthenticated
      */
     public function handle(Request $request, Closure $next)
     {
+        // Cek API auth session
+        if (session('logged_in') && session('access_token')) {
+            return redirect()->route('dashboard.index');
+        }
+        
         // Cek admin user terlebih dahulu
         if (\Illuminate\Support\Facades\Auth::guard('admin')->check()) {
             return redirect()->route('dashboard.index');

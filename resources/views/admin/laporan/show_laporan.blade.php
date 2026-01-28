@@ -138,8 +138,7 @@
                                                 <i class="fa fa-credit-card"></i> Pembayaran #{{ $loop->iteration }}
                                             </h6>
                                             <small class="text-muted">
-                                                <i class="fa fa-calendar"></i>
-                                                {{ $payment->created_at->format('d F Y H:i') }}
+                                                <i class="fa fa-calendar"></i> {{ $payment->created_at->format('d F Y H:i') }}
                                             </small>
                                         </div>
                                         <div>
@@ -158,7 +157,7 @@
                                             @endif
                                         </div>
                                     </div>
-
+                                    
                                     <div class="mt-3">
                                         @if ($payment->bukti_pembayaran)
                                             <a href="{{ asset('storage/' . $payment->bukti_pembayaran) }}" target="_blank"
@@ -170,8 +169,8 @@
                                                 <i class="fa fa-exclamation-triangle"></i> Bukti pembayaran belum diupload
                                             </span>
                                         @endif
-
-                                        @if ($payment->note)
+                                        
+                                        @if($payment->note)
                                             <div class="mt-2">
                                                 <small class="text-muted">
                                                     <strong>Catatan:</strong> {{ $payment->note }}
@@ -214,7 +213,6 @@
                                         <th>Tanggal Upload</th>
                                         <th>Catatan Upload</th>
                                         <th>Status Dokumen</th>
-                                        <th>Catatan Admin</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -273,25 +271,14 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <small class="text-muted">
-                                                    {{ $dokumen['catatan_admin'] ?? '-' }}
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex gap-1">
-                                                    @if ($dokumen['is_uploaded'] && $dokumen['file_path'])
-                                                        <a href="{{ asset('storage/' . $dokumen['file_path']) }}"
-                                                            target="_blank" class="btn btn-sm btn-primary">
-                                                            <i class="fa fa-eye"></i> Lihat
-                                                        </a>
-                                                    @endif
-                                                    @if ($dokumen['is_uploaded'])
-                                                        <button type="button" class="btn btn-sm btn-info"
-                                                            onclick="openStatusModal('{{ $dokumen['pendaftar_document_id'] }}', '{{ $dokumen['status_dokumen'] ?? 'menunggu' }}', '{{ $dokumen['nama_dokumen'] }}', '{{ $dokumen['catatan_admin'] ?? '' }}')">
-                                                            <i class="fa fa-edit"></i> Status
-                                                        </button>
-                                                    @endif
-                                                </div>
+                                                @if ($dokumen['is_uploaded'] && $dokumen['file_path'])
+                                                    <a href="{{ asset('storage/' . $dokumen['file_path']) }}"
+                                                        target="_blank" class="btn btn-sm btn-primary">
+                                                        <i class="fa fa-eye"></i> Lihat
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -355,110 +342,30 @@
         </div>
     </div>
 
-    <!-- Modal Update Status Dokumen -->
-    <div class="modal fade" id="statusDokumenModal" tabindex="-1" aria-labelledby="statusDokumenModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="statusDokumenModalLabel">Update Status Dokumen</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formUpdateStatusDokumen" method="POST" action="">
-                    @csrf
-                    @method('PATCH')
-                    <div class="modal-body">
-                        <input type="hidden" id="dokumen_id" name="dokumen_id">
-
-                        <div class="mb-3">
-                            <label for="nama_dokumen_display" class="form-label">Nama Dokumen</label>
-                            <input type="text" id="nama_dokumen_display" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="status_dokumen" class="form-label">Status Dokumen</label>
-                            <select id="status_dokumen" name="status_dokumen" class="form-select" required>
-                                <option value="menunggu">Menunggu</option>
-                                <option value="disetujui">Disetujui</option>
-                                <option value="ditolak">Ditolak</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="catatan_admin" class="form-label">Catatan Admin</label>
-                            <textarea id="catatan_admin" name="catatan_admin" class="form-control" rows="3">{{ $dokumen['catatan_admin'] ?? '' }}</textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Fungsi untuk membuka modal
-            window.openStatusModal = function(dokumenId, currentStatus, namaDokumen, catatanAdmin) {
-                // Set nilai form
-                console.log('Dokumen ID:', dokumenId); // Debug
-                document.getElementById('dokumen_id').value = dokumenId;
-                document.getElementById('nama_dokumen_display').value = namaDokumen;
-                document.getElementById('status_dokumen').value = currentStatus;
-                
-                // Set catatan admin jika ada
-                if (catatanAdmin) {
-                    document.getElementById('catatan_admin').value = catatanAdmin;
-                } else {
-                    document.getElementById('catatan_admin').value = '';
-                }
-
-                // Tampilkan/sembunyikan textarea berdasarkan status
-                toggleCatatanField(currentStatus);
-
-                // Set action form dengan JSON encode untuk menghindari error
-                var routeTemplate = @json(route('pendaftar.update-status-dokumen-pendaftar', ['id' => ':id']));
-                var actionUrl = routeTemplate.replace(':id', dokumenId);
-                console.log('Action URL:', actionUrl); // Debug
-                document.getElementById('formUpdateStatusDokumen').action = actionUrl;
-
-                // Show modal
-                var modalEl = document.getElementById('statusDokumenModal');
-                var modal = new bootstrap.Modal(modalEl);
-                modal.show();
-            };
-
-            // Fungsi untuk toggle textarea catatan
-            function toggleCatatanField(status) {
-                var catatanField = document.getElementById('catatan_admin');
-                if (status == 'ditolak') {
-                    catatanField.style.display = 'block';
-                } else {
-                    catatanField.style.display = 'none';
-                }
-            }
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            $('#status_dokumen').on('change', function() {
-                var selectedStatus = $(this).val();
-                var catatanField = $('#catatan_admin');
-                
-                if (selectedStatus == 'ditolak') {
-                    catatanField.show();
-                } else {
-                    catatanField.hide();
-                    // Kosongkan catatan jika status bukan 'ditolak'
-                    catatanField.val('');
-                }
-            });
-        });
-    </script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fungsi untuk membuka modal
+    window.openStatusModal = function(dokumenId, currentStatus, namaDokumen) {
+        // Set nilai form
+        console.log('Dokumen ID:', dokumenId); // Debug
+        document.getElementById('dokumen_id').value = dokumenId;
+        document.getElementById('nama_dokumen_display').value = namaDokumen;
+        document.getElementById('status_dokumen').value = currentStatus;
+        
+        // Set action form dengan JSON encode untuk menghindari error
+        var routeTemplate = @json(route('pendaftar.update-status-dokumen-pendaftar', ['id' => ':id']));
+        var actionUrl = routeTemplate.replace(':id', dokumenId);
+        console.log('Action URL:', actionUrl); // Debug
+        document.getElementById('formUpdateStatusDokumen').action = actionUrl;
+        
+        // Show modal
+        var modalEl = document.getElementById('statusDokumenModal');
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    };
+});
+</script>
 @endpush

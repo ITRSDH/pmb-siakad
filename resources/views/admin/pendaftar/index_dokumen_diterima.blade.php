@@ -108,6 +108,7 @@
                                         <th>Periode</th>
                                         <th>Kelengkapan Dokumen</th>
                                         <th>Status Pembayaran</th>
+                                        <th>Status Pendaftaran</th>
                                         <th>Tanggal Daftar</th>
                                         <th>Aksi</th>
                                     </tr>
@@ -179,6 +180,13 @@
                                                     @endif
                                                 @else
                                                     <span class="badge badge-secondary">Belum Bayar</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if ($pendaftar->status === 'submitted')
+                                                    <span class="badge badge-success">Disetujui</span>
+                                                @else
+                                                    <span class="badge badge-secondary">Belum Disetujui</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -295,7 +303,7 @@
                         <input type="hidden" id="modalPendaftarId" name="pendaftar_id">
                         
                         <div class="mb-3">
-                            <label for="statusPendaftaran" class="form-label">Status Dokumen</label>
+                            <label for="statusPendaftaran" class="form-label">Status Pendaftar</label>
                             <select class="form-select" id="statusPendaftaran" name="status" required>
                                 <option value="draft">Draft</option>
                                 <option value="submitted">Submitted</option>
