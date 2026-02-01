@@ -105,7 +105,7 @@ class PembayaranController extends Controller
             ]);
 
             // Kirim ke API internal
-            $urlapi = config('api.base_url') . 'internal/pembayaran-pmb';
+            $urlapi = config('api.api_url') . 'internal/pembayaran-pmb';
 
             // Use fopen for reliable stream
             $fileStream = fopen($fullPath, 'r');
