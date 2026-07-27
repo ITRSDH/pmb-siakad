@@ -2,6 +2,14 @@
 
 @section('title', 'Detail Pendaftar')
 
+@php
+    $backUrl = match(request('from')) {
+        'menunggu' => route('pendaftar.dokumen.menunggu'),
+        'diterima' => route('pendaftar.dokumen.diterima'),
+        default => url()->previous(),
+    };
+@endphp
+
 @section('content')
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>

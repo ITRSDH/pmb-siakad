@@ -96,7 +96,7 @@ class BiayaPendaftaranController extends Controller
             [
                 'nama_biaya' => 'required|string|max:255',
                 'jumlah_biaya' => 'required|integer|min:0',
-                'jalur_pendaftaran_id' => 'required|exists:jalur_pendaftarans,id',
+                'jalur_pendaftaran_id' => 'required|exists:jalur_pendaftaran,id',
             ],
             [
                 'nama_biaya.required' => 'Nama biaya wajib diisi',

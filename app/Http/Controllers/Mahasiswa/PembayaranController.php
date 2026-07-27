@@ -35,6 +35,7 @@ class PembayaranController extends Controller
         $pembayaran = $pendaftar->payments->sortByDesc('created_at')->first();
         return view('pmb.pembayaran.tambah_pembayaran', compact('pendaftar', 'pembayaran'));
     }
+    
     public function store(Request $request, $id)
     {
         $user = auth('google')->user();
@@ -154,9 +155,6 @@ class PembayaranController extends Controller
             ]);
         }
     }
-
-
-
 
 
     public function showBukti($id)

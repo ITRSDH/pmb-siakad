@@ -194,7 +194,7 @@
                                             </td>
                                             <td>
                                                 <div class="form-button-action">
-                                                    <a href="{{ route('pendaftar.show', $pendaftar->id) }}" 
+                                                    <a href="{{ route('pendaftar.show', ['id' => $pendaftar->id, 'from' => 'diterima']) }}" 
                                                        class="btn btn-link btn-primary btn-lg" 
                                                        data-bs-toggle="tooltip" 
                                                        title="Lihat Detail">
