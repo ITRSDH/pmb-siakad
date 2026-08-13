@@ -187,9 +187,13 @@
                     <select name="sumber_informasi" required
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                         <option value="">-- Pilih --</option>
-                        <option value="Guru BK" {{ old('sumber_informasi') == 'Guru BK' ? 'selected' : '' }}>Guru BK</option>
+                        <option value="Media-Sosial" {{ old('sumber_informasi') == 'Media-Sosial' ? 'selected' : '' }}>Media Sosial(Instagram, Telegram)</option>
+                        <option value="Teman-atau-Saudara" {{ old('sumber_informasi') == 'Teman-atau-Saudara' ? 'selected' : '' }}>Teman atau Saudara</option>
+                        <option value="Sekolah-Asal" {{ old('sumber_informasi') == 'Sekolah-Asal' ? 'selected' : '' }}>Sekolah Asal</option>
                         <option value="Website" {{ old('sumber_informasi') == 'Website' ? 'selected' : '' }}>Website</option>
-                        <option value="Telegram" {{ old('sumber_informasi') == 'Telegram' ? 'selected' : '' }}>Telegram</option>
+                        <option value="Spanduk-atau-Poster" {{ old('sumber_informasi') == 'Spanduk-atau-Poster' ? 'selected' : '' }}>Spanduk atau Poster</option>
+                        <option value="Edufair-atau-Expo" {{ old('sumber_informasi') == 'Edufair-atau-Expo' ? 'selected' : '' }}>Edufair atau Expo</option>
+                        <option value="Lainnya" {{ old('sumber_informasi') == 'Lainnya' ? 'selected' : '' }}>Lainnya(Alumni, Karyawan, dll)</option>
                     </select>
                 </div>
 

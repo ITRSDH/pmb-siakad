@@ -181,6 +181,67 @@ class MahasiswaController extends Controller
             ], 500);
         }
     }
+    
+    public function getPeriodePendaftaranLanding(Request $request): JsonResponse
+    {
+        try {
+            $periodes = PeriodePendaftaran::with([
+                    'gelombang:id,nama_gelombang',
+                    'jalurPendaftaran:id,nama_jalur',
+                    'biayaPendaftaran:id,jumlah_biaya'
+                ])
+                ->select([
+                    'id',
+                    'nama_periode',
+                    'gelombang_id',
+                    'jalur_pendaftaran_id',
+                    'biaya_pendaftaran_id',
+                    'kuota',
+                    'kuota_terisi',
+                    'status',
+                    'tanggal_mulai',
+                    'tanggal_selesai',
+                ])
+                ->berjalan()
+                ->latest()
+                ->get();
+    
+            $transformedData = $periodes->map(function ($periode) {
+                return [
+                    'id' => $periode->id,
+                    'nama_periode' => $periode->nama_periode,
+                    'nama_gelombang' => optional($periode->gelombang)->nama_gelombang,
+                    'nama_jalur_pendaftaran' => optional($periode->jalurPendaftaran)->nama_jalur,
+                    'biaya_pendaftaran' => optional($periode->biayaPendaftaran)->jumlah_biaya,
+                    'status' => $periode->status,
+                    'total_kuota' => $periode->kuota,
+                    'kuota_terisi' => $periode->kuota_terisi,
+                    'kuota_sisa' => $periode->kuota_sisa,
+                    'tanggal_mulai' => $periode->tanggal_mulai,
+                    'tanggal_selesai' => $periode->tanggal_selesai,
+                ];
+            });
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Data periode pendaftaran berhasil diambil',
+                'data' => $transformedData,
+                'meta' => [
+                    'total_count' => $transformedData->count()
+                ]
+            ], 200);
+    
+        } catch (\Throwable $e) {
+    
+            report($e);
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan pada server.',
+                'data' => null
+            ], 500);
+        }
+    }
 
     /**
      * Get single mahasiswa by ID

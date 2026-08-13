@@ -21,4 +21,5 @@ Route::prefix('pmb')->group(function () {
     Route::get('/mahasiswa', [MahasiswaController::class, 'index']);
     Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'show']);
     Route::get('/periode-pendaftaran', [MahasiswaController::class, 'getPeriodePendaftaran']);
+    Route::get('/periode-pendaftaran/landing', [MahasiswaController::class, 'getPeriodePendaftaranLanding']);
 });
