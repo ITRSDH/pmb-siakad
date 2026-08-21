@@ -78,7 +78,8 @@
             @endif
 
             <div class="mt-4 mb-6 p-4 rounded bg-gray-50 dark:bg-gray-700">
-                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $pendaftar->nomor_pendaftaran }}</div>
+                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $pendaftar->nama_lengkap }}</div>
+                <div class="text-sm text-gray-500">No. Pendaftaran: {{ $pendaftar->nomor_pendaftaran }}</div>
                 <div class="text-sm text-gray-500">Periode: {{ $periode->nama_periode ?? '-' }}</div>
                 <div class="text-sm text-gray-500">Total Bayar:
                     <span class="font-semibold text-indigo-700 dark:text-indigo-300">

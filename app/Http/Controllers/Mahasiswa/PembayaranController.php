@@ -57,11 +57,13 @@ class PembayaranController extends Controller
             $path = $file->store('pembayaran', 'public');
             $fullPath = Storage::disk('public')->path($path);
 
+            $email = $user?->email ?: $pendaftar->email;
+
             // Data untuk body API - Flatten the array for multipart/form-data
             $postData = [
                 'pendaftar[id]'       => $pendaftar->id,
                 'pendaftar[nama]'     => $pendaftar->nama_lengkap,
-                'pendaftar[email]'    => $pendaftar->email,
+                'pendaftar[email]'    => $email,
                 'biaya'               => $pendaftar->periodePendaftaran->biayaPendaftaran->jumlah_biaya,
                 'pembayaran[tanggal]' => $validated['tanggal_pembayaran'],
                 'pembayaran[catatan]' => $validated['catatan'] ?? null,
@@ -77,16 +79,17 @@ class PembayaranController extends Controller
 
             // Re-create nested data just for signature consistency if validation existed (it doesn't in target, but good practice)
             // IMPORTANT: Cast to string to match server-side multipart/form-data parsing behavior
+            // Convert empty strings to null to match target server's ConvertEmptyStringsToNull middleware
             $signatureData = [
                 'pendaftar' => [
                     'id'    => (string) $pendaftar->id,
                     'nama'  => (string) $pendaftar->nama_lengkap,
-                    'email' => (string) $pendaftar->email,
+                    'email' => $email !== null && $email !== '' ? (string) $email : null,
                 ],
                 'biaya' => (string) $pendaftar->periodePendaftaran->biayaPendaftaran->jumlah_biaya,
                 'pembayaran' => [
                     'tanggal' => (string) $validated['tanggal_pembayaran'],
-                    'catatan' => isset($validated['catatan']) ? (string) $validated['catatan'] : null,
+                    'catatan' => isset($validated['catatan']) && $validated['catatan'] !== '' ? (string) $validated['catatan'] : null,
                 ],
                 'filename' => (string) basename($path),
             ];
