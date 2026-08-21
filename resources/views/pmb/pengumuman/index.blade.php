@@ -56,7 +56,7 @@
                             </div>
                             <div class="text-right">
                                 <div class="mb-1">
-                                    <span class="text-xs text-gray-500">Status Dokumen:</span>
+                                    <span class="text-xs text-gray-500">Status Pendaftar:</span>
                                     <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold
                                         @if($statusPendaftar === 'submitted')
                                             bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
@@ -132,7 +132,7 @@
                                                         <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                                         </svg>
-                                                        Dokumen pendaftaran terverifikasi
+                                                        Status pendaftaran terverifikasi
                                                     </li>
                                                     <li class="flex items-center">
                                                         <svg class="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -150,14 +150,12 @@
                                             </div>
                                             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-md p-3 border border-blue-200 dark:border-blue-700">
                                                 <p class="font-semibold text-blue-800 dark:text-blue-200 mb-1">📅 Tahap Selanjutnya:</p>
-                                                <p class="text-sm text-blue-700 dark:text-blue-300">
-                                                    Silakan pantau pengumuman secara berkala untuk informasi mengenai:
+                                                <p class="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                                                    Silakan lengkapi data kelengkapan pendaftar dengan mengupload dokumen-dokumen yang diperlukan.
                                                 </p>
-                                                <ul class="mt-2 text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
-                                                    <li>Jadwal tes masuk (jika ada)</li>
-                                                    <li>Pengumuman kelulusan akhir</li>
-                                                    <li>Prosedur daftar ulang</li>
-                                                </ul>
+                                                <a href="{{ route('pmb.kelengkapan-pendaftar.index') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                                    <i class="fas fa-file-upload mr-2"></i> Isi Kelengkapan Dokumen
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -178,7 +176,7 @@
                                             Menunggu Konfirmasi Pembayaran
                                         </h4>
                                         <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                                            <p>Dokumen Anda telah diverifikasi. Menunggu konfirmasi pembayaran dari admin.</p>
+                                            <p>Pendaftaran Anda telah diverifikasi. Menunggu konfirmasi pembayaran dari admin.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -202,31 +200,6 @@
                                             <div class="mt-3">
                                                 <a href="{{ route('pmb.pembayaran.index') }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                                                     Bayar Sekarang
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        @elseif($statusPendaftar === 'rejected')
-                            <!-- DOKUMEN DITOLAK -->
-                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-3">
-                                        <h4 class="text-sm font-medium text-red-800 dark:text-red-200">
-                                            Dokumen Ditolak
-                                        </h4>
-                                        <div class="mt-2 text-sm text-red-700 dark:text-red-300">
-                                            <p>Dokumen pendaftaran Anda ditolak. Silakan upload ulang dokumen yang sesuai dengan ketentuan.</p>
-                                            <div class="mt-3">
-                                                <a href="{{ route('pmb.riwayat.edit', $pendaftar->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
-                                                    Upload Ulang Dokumen
                                                 </a>
                                             </div>
                                         </div>

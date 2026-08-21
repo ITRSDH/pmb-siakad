@@ -99,7 +99,7 @@ class PembayaranController extends Controller
                 config('services.internal_api.secret')
             );
 
-            \Log::info('HMAC DEBUG CLIENT', [
+            Log::info('HMAC DEBUG CLIENT', [
                 'stringToSign' => $stringToSign,
                 'timestamp'    => $timestamp,
                 'secret'       => config('services.internal_api.secret'),
@@ -125,7 +125,7 @@ class PembayaranController extends Controller
 
             // Cek response
             if (! $response->successful()) {
-                \Log::error('API pembayaran gagal', [
+                Log::error('API pembayaran gagal', [
                     'status' => $response->status(),
                     'body'   => $response->body(),
                 ]);
@@ -146,7 +146,7 @@ class PembayaranController extends Controller
                 ->route('pmb.pembayaran.index')
                 ->with('success', 'Bukti pembayaran berhasil diupload, menunggu verifikasi.');
         } catch (\Throwable $e) {
-            \Log::error('Gagal upload pembayaran', [
+            Log::error('Gagal upload pembayaran', [
                 'error' => $e->getMessage(),
             ]);
 
@@ -218,7 +218,7 @@ class PembayaranController extends Controller
             return response()->json(['success' => true]);
 
         } catch (\Throwable $e) {
-            \Log::error('Webhook Error', ['msg' => $e->getMessage()]);
+            Log::error('Webhook Error', ['msg' => $e->getMessage()]);
              return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }

@@ -17,6 +17,8 @@ use App\Http\Controllers\Mahasiswa\RiwayatPendaftaranController;
 use App\Http\Controllers\Mahasiswa\PengumumanController;
 use App\Http\Controllers\Mahasiswa\PembayaranController;
 use App\Http\Controllers\Mahasiswa\KelengkapanDokumenController;
+use App\Http\Controllers\Mahasiswa\KelengkapanPendaftarController;
+use App\Http\Controllers\Admin\KelengkapanPendaftarController as AdminKelengkapanPendaftarController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -109,6 +111,31 @@ Route::prefix('mahasiswa')->group(function () {
             'destroy' => 'pmb.dokumen.destroy'
         ]);
 
+    // Kelengkapan Pendaftar routes
+    Route::get('/pmb/kelengkapan-pendaftar', [KelengkapanPendaftarController::class, 'index'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.index');
+
+    Route::get('/pmb/kelengkapan-pendaftar/create', [KelengkapanPendaftarController::class, 'create'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.create');
+
+    Route::post('/pmb/kelengkapan-pendaftar', [KelengkapanPendaftarController::class, 'store'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.store');
+
+    Route::get('/pmb/kelengkapan-pendaftar/{id}/edit', [KelengkapanPendaftarController::class, 'edit'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.edit');
+
+    Route::put('/pmb/kelengkapan-pendaftar/{id}', [KelengkapanPendaftarController::class, 'update'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.update');
+
+    Route::get('/pmb/kelengkapan-pendaftar/{id}', [KelengkapanPendaftarController::class, 'show'])
+        ->middleware('auth:google')
+        ->name('pmb.kelengkapan-pendaftar.show');
+
     // Webhook for Payment Status Update
     Route::post('/webhook/payment-status', [PembayaranController::class, 'handleWebhook'])->name('webhook.payment.status');
 });
@@ -131,6 +158,12 @@ Route::middleware('api.auth')->group(function () {
     Route::resource('prodi', ProdiController::class);
     Route::resource('periode-pendaftaran', PeriodePendaftaranController::class);
     Route::resource('dokumen-pendaftar', DokumenPendaftarController::class);
+
+    // Route Kelengkapan Pendaftar
+    Route::get('/kelengkapan-pendaftar', [AdminKelengkapanPendaftarController::class, 'index'])->name('kelengkapan-pendaftar.index');
+    Route::get('/kelengkapan-pendaftar/{id}', [AdminKelengkapanPendaftarController::class, 'show'])->name('kelengkapan-pendaftar.show');
+    Route::post('/kelengkapan-pendaftar/{id}/update-status', [AdminKelengkapanPendaftarController::class, 'updateStatusPendaftaran'])->name('kelengkapan-pendaftar.update-status');
+    Route::get('/kelengkapan-pendaftar/{id}/download', [AdminKelengkapanPendaftarController::class, 'downloadDokumen'])->name('kelengkapan-pendaftar.download');
 
     // Route::get('/pendaftar/pembayaran/menunggu', [PendaftarController::class, 'indexPembayaranMenunggu'])->name('pendaftar.pembayaran.menunggu');
     // Route::get('/pendaftar/pembayaran/diterima', [PendaftarController::class, 'indexPembayaranDiterima'])->name('pendaftar.pembayaran.diterima');

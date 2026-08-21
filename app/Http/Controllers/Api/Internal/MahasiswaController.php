@@ -25,7 +25,7 @@ class MahasiswaController extends Controller
                 'asal_sekolah', 'asal_info', 'periode_pendaftaran_id', 'prodi_id', 
                 'status', 'created_at', 'updated_at'
             ])->with([
-                'periodePendaftaran:id,nama_periode,jalur_pendaftaran_id',
+                'periodePendaftaran:id,nama_periode,jalur_pendaftaran_id,tanggal_mulai',
                 'periodePendaftaran.jalurPendaftaran:id,nama_jalur',
                 'periodePendaftaran.dokumenPendaftars' => function($q) {
                     $q->select('dokumen_pendaftar_id', 'nama_dokumen')
@@ -33,8 +33,9 @@ class MahasiswaController extends Controller
                 },
                 'prodi:id,nama_prodi,kode_prodi',
                 'payments:id,pendaftar_id,status,metode_pembayaran,tanggal_pembayaran',
-                'documents:id,pendaftar_id,dokumen_pendaftar_id,status_dokumen,alamat_dokumen',
-                'documents.dokumenPendaftar:id,nama_dokumen'
+                'kelengkapan:pendaftar_id,nama_lengkap,nik,jenis_kelamin,tanggal_lahir,tempat_lahir,alamat_lengkap,no_hp,email,asal_sekolah,pas_foto,ktp,kk,ijazah_skl'
+                // 'documents:id,pendaftar_id,dokumen_pendaftar_id,status_dokumen,alamat_dokumen',
+                // 'documents.dokumenPendaftar:id,nama_dokumen'
             ]);
 
             // Filter dasar (sama seperti indexDokumenDiterima)
@@ -67,32 +68,61 @@ class MahasiswaController extends Controller
                                ->limit($limit)
                                ->get();
 
-            // Filter manual untuk dokumen lengkap (sama seperti indexDokumenDiterima)
-            $filteredPendaftars = $pendaftars->filter(function ($pendaftar) {
-                $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars ?? collect([]);
-                $dokumenTerupload = $pendaftar->documents ?? collect([]);
-                
-                $dokumenWajibDiperlukan = $dokumenDiperlukan->where('is_wajib', true)->count();
-                $dokumenWajibLengkap = $dokumenTerupload->whereIn('dokumen_pendaftar_id', 
-                    $dokumenDiperlukan->where('is_wajib', true)->pluck('id'))->count();
-                
-                return $dokumenWajibLengkap >= $dokumenWajibDiperlukan;
+            // Parse tanggal_mulai untuk mengubah dari Date menjadi tahun saja
+            $pendaftars->each(function ($pendaftar) {
+                if ($pendaftar->periodePendaftaran && $pendaftar->periodePendaftaran->tanggal_mulai) {
+                    $tanggalMulai = $pendaftar->periodePendaftaran->tanggal_mulai;
+                    if (is_string($tanggalMulai)) {
+                        // Jika string format YYYY-MM-DD, ambil 4 karakter pertama (tahun)
+                        $pendaftar->periodePendaftaran->tanggal_mulai = substr($tanggalMulai, 0, 4);
+                    } elseif (is_object($tanggalMulai) && method_exists($tanggalMulai, 'year')) {
+                        // Jika Carbon object, ambil tahun
+                        $pendaftar->periodePendaftaran->tanggal_mulai = $tanggalMulai->year;
+                    }
+                }
             });
 
+            // Filter manual untuk dokumen lengkap (sama seperti indexDokumenDiterima)
+            // $filteredPendaftars = $pendaftars->filter(function ($pendaftar) {
+            //     $dokumenDiperlukan = $pendaftar->periodePendaftaran->dokumenPendaftars ?? collect([]);
+            //     $dokumenTerupload = $pendaftar->documents ?? collect([]);
+                
+            //     $dokumenWajibDiperlukan = $dokumenDiperlukan->where('is_wajib', true)->count();
+            //     $dokumenWajibLengkap = $dokumenTerupload->whereIn('dokumen_pendaftar_id', 
+            //         $dokumenDiperlukan->where('is_wajib', true)->pluck('id'))->count();
+                
+            //     return $dokumenWajibLengkap >= $dokumenWajibDiperlukan;
+            // });
+
             // Transform data untuk response
-            $transformedData = $filteredPendaftars->map(function ($pendaftar) {
+            $transformedData = $pendaftars->map(function ($pendaftar) {
+                $kelengkapan = $pendaftar->kelengkapan;
                 return [
                     'id' => $pendaftar->id,
                     'nomor_pendaftaran' => $pendaftar->nomor_pendaftaran,
-                    'nama_lengkap' => $pendaftar->nama_lengkap,
-                    'email' => $pendaftar->email,
-                    'no_hp' => $pendaftar->no_hp,
-                    'jenis_kelamin' => $pendaftar->jenis_kelamin,
-                    'tanggal_lahir' => $pendaftar->tanggal_lahir->format('Y-m-d'),
-                    'alamat' => $pendaftar->alamat,
+                    'nama_lengkap' => $kelengkapan->nama_lengkap ?? null,
+                    'email' => $kelengkapan->email ?? $pendaftar->email ?? null,
+                    'no_hp' => $kelengkapan->no_hp ?? $pendaftar->no_hp ?? null,
+                    'jenis_kelamin' => $kelengkapan->jenis_kelamin ?? $pendaftar->jenis_kelamin ?? null,
+                    'tanggal_lahir' => $kelengkapan?->tanggal_lahir
+                        ? (is_string($kelengkapan->tanggal_lahir) ? $kelengkapan->tanggal_lahir : $kelengkapan->tanggal_lahir->format('Y-m-d'))
+                        : ($pendaftar->tanggal_lahir
+                            ? (is_string($pendaftar->tanggal_lahir) ? $pendaftar->tanggal_lahir : $pendaftar->tanggal_lahir->format('Y-m-d'))
+                            : null),
+                    'alamat' => $kelengkapan->alamat_lengkap ?? $pendaftar->alamat ?? null,
                     'pendidikan_terakhir' => $pendaftar->pendidikan_terakhir,
-                    'asal_sekolah' => $pendaftar->asal_sekolah,
-                    
+                    'asal_sekolah' => $kelengkapan->asal_sekolah ?? $pendaftar->asal_sekolah ?? null,
+                    'tanggal_masuk' => $pendaftar->periodePendaftaran->tanggal_mulai ?? null,
+                    'nik' => $kelengkapan->nik ?? null,
+                    'tempat_lahir' => $kelengkapan->tempat_lahir ?? null,
+                    'tahun_angkatan' => $pendaftar->periodePendaftaran->tanggal_mulai
+                        ? (is_numeric($pendaftar->periodePendaftaran->tanggal_mulai)
+                            ? (int) $pendaftar->periodePendaftaran->tanggal_mulai
+                            : (is_object($pendaftar->periodePendaftaran->tanggal_mulai) && method_exists($pendaftar->periodePendaftaran->tanggal_mulai, 'year')
+                                ? (int) $pendaftar->periodePendaftaran->tanggal_mulai->year
+                                : (int) substr($pendaftar->periodePendaftaran->tanggal_mulai, 0, 4)))
+                        : null,
+
                     // Relasi data
                     'periode_pendaftaran' => [
                         'id' => $pendaftar->periodePendaftaran->id ?? null,
@@ -107,13 +137,18 @@ class MahasiswaController extends Controller
                         'nama_prodi' => $pendaftar->prodi->nama_prodi ?? null,
                         'kode_prodi' => $pendaftar->prodi->kode_prodi ?? null,
                     ],
-                    
+
                     // Status info
                     'status_pendaftaran' => $pendaftar->status,
                     'status_pembayaran' => $pendaftar->payments->first()?->status ?? null,
-                    'total_dokumen' => $pendaftar->documents->count(),
-                    'dokumen_disetujui' => $pendaftar->documents->where('status_dokumen', 'approved')->count(),
-                    
+                    'total_dokumen' => 4, // Total dokumen yang diperlukan (pas_foto, ktp, kk, ijazah_skl)
+                    'dokumen_disetujui' => $kelengkapan ? (
+                        ($kelengkapan->pas_foto ? 1 : 0) +
+                        ($kelengkapan->ktp ? 1 : 0) +
+                        ($kelengkapan->kk ? 1 : 0) +
+                        ($kelengkapan->ijazah_skl ? 1 : 0)
+                    ) : 0,
+
                     // Timestamps
                     'tanggal_daftar' => $pendaftar->created_at->format('Y-m-d H:i:s'),
                     'updated_at' => $pendaftar->updated_at->format('Y-m-d H:i:s'),

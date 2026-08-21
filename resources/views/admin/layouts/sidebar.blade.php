@@ -105,8 +105,15 @@
                     <h4 class="text-section">Registrasi</h4>
                 </li>
 
+                <li class="nav-item {{ request()->routeIs('kelengkapan-pendaftar*') ? 'active' : '' }}">
+                    <a href="{{ route('kelengkapan-pendaftar.index') }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <p>Kelengkapan Pendaftar</p>
+                    </a>
+                </li>
+
                 <!-- Dokumen -->
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a data-bs-toggle="collapse" href="#dokumen">
                         <i class="fas fa-file-alt"></i>
                         <p>Data Dokumen</p>
@@ -131,7 +138,7 @@
                             </li>
                         </ul>
                     </div>
-                </li>
+                </li> --}}
 
                 <!-- Reports -->
                 <li class="nav-section">

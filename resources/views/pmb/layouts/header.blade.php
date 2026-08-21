@@ -29,23 +29,23 @@
 			'href' => (Route::has('pmb.pembayaran.index') ? route('pmb.pembayaran.index') : '#'),
 			'active' => request()->routeIs('pmb.pembayaran.*'),
 		],
+		[
+			'label' => 'Pengumuman',
+			'href' => (Route::has('pmb.pengumuman.index') ? route('pmb.pengumuman.index') : '#'),
+			'active' => request()->routeIs('pmb.pengumuman.*'),
+		]
 	];
 	
 	// Tambahkan menu Dokumen hanya jika sudah membayar
 	if ($sudahBayar) {
 		$navLinks[] = [
-			'label' => 'Dokumen',
-			'href' => (Route::has('pmb.dokumen.index') ? route('pmb.dokumen.index') : '#'),
-			'active' => request()->routeIs('pmb.dokumen.*'),
+			'label' => 'Kelengkapan',
+			'href' => (Route::has('pmb.kelengkapan-pendaftar.index') ? route('pmb.kelengkapan-pendaftar.index') : '#'),
+			'active' => request()->routeIs('pmb.kelengkapan-pendaftar.*'),
 		];
 	}
 	
 	$navLinks = array_merge($navLinks, [
-		[
-			'label' => 'Pengumuman',
-			'href' => (Route::has('pmb.pengumuman.index') ? route('pmb.pengumuman.index') : '#'),
-			'active' => request()->routeIs('pmb.pengumuman.*'),
-		],
 		[
 			'label' => 'Riwayat',
 			// header can't assume a pendaftar instance; point to dashboard where biodata management is accessible

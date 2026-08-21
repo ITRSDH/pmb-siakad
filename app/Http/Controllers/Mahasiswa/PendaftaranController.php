@@ -128,15 +128,9 @@ class PendaftaranController extends Controller
 
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'nik' => 'nullable|numeric|digits:16',
-            'email' => 'nullable|email|max:255',
             'no_hp' => 'required|string|min:10|max:15|regex:/^[0-9]+$/',
-            'jenis_kelamin' => 'required|in:L,P',
-            'tanggal_lahir' => 'nullable|date|before:today',
-            'alamat' => 'nullable|string|max:1000',
-            'pendidikan_terakhir' => 'required|in:SMA,SMK,MA,PAKET C',
-            'asal_sekolah' => 'nullable|string|max:255',
-            'sumber_informasi' => 'required|in:Guru BK,Website,Telegram',
+            'sumber_informasi' => 'required|in:Media-Sosial,Teman-atau-Saudara,Sekolah-Asal,Website,Spanduk-atau-Poster,Edufair-atau-Expo,Lainnya',
+            'lainnya' => 'nullable',
             'prodi_id' => 'required|exists:prodi,id',
         ]);
 
@@ -179,16 +173,10 @@ class PendaftaranController extends Controller
                 'google_user_id' => $user?->id,
                 'prodi_id' => $validated['prodi_id'],
                 'nama_lengkap' => $validated['nama_lengkap'],
-                'nik' => $validated['nik'],
-                'email' => $validated['email'],
                 'no_hp' => $validated['no_hp'],
-                'jenis_kelamin' => $validated['jenis_kelamin'],
-                'tanggal_lahir' => $validated['tanggal_lahir'],
-                'alamat' => $validated['alamat'],
-                'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
-                'asal_sekolah' => $validated['asal_sekolah'],
                 'asal_info' => $validated['sumber_informasi'],
-                'status' => 'draft',
+                'lainnya' => $validated['lainnya'] ?? null,
+                'status' => 'submitted',
             ]);
 
             // Atomic increment kuota_terisi

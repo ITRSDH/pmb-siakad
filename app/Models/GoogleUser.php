@@ -49,4 +49,10 @@ class GoogleUser extends Authenticatable
             'email_verified_at' => 'datetime',
         ];
     }
+
+    // Relasi ke Pendaftar
+    public function pendaftar()
+    {
+        return $this->hasOne(\App\Models\Pendaftar::class, 'google_user_id');
+    }
 }

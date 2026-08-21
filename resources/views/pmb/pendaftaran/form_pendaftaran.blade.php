@@ -3,7 +3,7 @@
 @section('title', 'Form Pendaftaran')
 
 @section('content')
-<div x-data="{ loading: false }" class="relative">
+<div x-data="{ loading: false, sumberInformasi: '{{ old('sumber_informasi') }}' }" class="relative">
 
     <!-- Overlay Loading -->
     <div 
@@ -77,31 +77,7 @@
                     @enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">NIK</label>
-                        <input type="text" name="nik" value="{{ old('nik') }}"
-                            maxlength="16"
-                            pattern="[0-9]{16}"
-                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 16);"
-                            class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                            placeholder="Masukkan 16 digit NIK" />
-                        @error('nik')
-                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-gray-500 mt-1">NIK harus 16 digit angka</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $user?->email) }}"
-                            class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
-                        @error('email')
-                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-1 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             No. HP <span class="text-red-500">*</span>
@@ -117,64 +93,6 @@
                         @enderror
                         <p class="text-xs text-gray-500 mt-1">Nomor HP harus 10-15 digit angka</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                            Jenis Kelamin <span class="text-red-500">*</span>
-                        </label>
-                        <select name="jenis_kelamin" required
-                            class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
-                            <option value="">-- Pilih --</option>
-                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
-                        @error('jenis_kelamin')
-                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Tanggal Lahir</label>
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}"
-                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
-                    @error('tanggal_lahir')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Alamat Lengkap</label>
-                    <textarea name="alamat" rows="3"
-                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">{{ old('alamat') }}</textarea>
-                    @error('alamat')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                        Pendidikan Terakhir <span class="text-red-500">*</span>
-                    </label>
-                    @error('pendidikan_terakhir')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                    <select name="pendidikan_terakhir" required
-                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
-                        <option value="">-- Pilih --</option>
-                        <option value="SMA" {{ old('pendidikan_terakhir') == 'SMA' ? 'selected' : '' }}>SMA</option>
-                        <option value="SMK" {{ old('pendidikan_terakhir') == 'SMK' ? 'selected' : '' }}>SMK</option>
-                        <option value="MA" {{ old('pendidikan_terakhir') == 'MA' ? 'selected' : '' }}>MA</option>
-                        <option value="PAKET C" {{ old('pendidikan_terakhir') == 'PAKET C' ? 'selected' : '' }}>PAKET C</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Asal Sekolah</label>
-                    <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah') }}"
-                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
-                    @error('asal_sekolah')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <div>
@@ -185,6 +103,7 @@
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                     <select name="sumber_informasi" required
+                        x-model="sumberInformasi"
                         class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
                         <option value="">-- Pilih --</option>
                         <option value="Media-Sosial" {{ old('sumber_informasi') == 'Media-Sosial' ? 'selected' : '' }}>Media Sosial(Instagram, Telegram)</option>
@@ -197,9 +116,23 @@
                     </select>
                 </div>
 
+                <div x-show="sumberInformasi === 'Lainnya'" x-transition>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Jelaskan Sumber Informasi <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="lainnya" value="{{ old('lainnya') }}"
+                        class="mt-1 block w-full rounded-md border border-gray-300 bg-white text-gray-900 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                        placeholder="Contoh: Alumni, Karyawan, dll" />
+                    @error('lainnya')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <div class="flex items-center justify-between mt-6">
                     <a href="{{ route('pmb.pendaftaran.index') }}" 
-                       class="text-sm text-gray-600 dark:text-gray-300">Batal</a>
+                       class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">
+                        Batal
+                    </a>
 
                     <button type="submit" 
                         class="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">

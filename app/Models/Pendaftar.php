@@ -36,16 +36,9 @@ class Pendaftar extends Model
         'periode_pendaftaran_id',
         'prodi_id',
         'nama_lengkap',
-        'nik',
-        'email',
-        'no_hp',
-        'jenis_kelamin',
-        'tanggal_lahir',
-        'alamat',
-        'pendidikan_terakhir',
         'status',
-        'asal_sekolah',
         'asal_info',
+        'lainnya',
     ];
 
     protected $casts = [
@@ -90,6 +83,12 @@ class Pendaftar extends Model
     public function payments()
     {
         return $this->hasMany(\App\Models\PendaftarPembayaran::class, 'pendaftar_id');
+    }
+    
+    // Kelengkapan pendaftar
+    public function kelengkapan()
+    {
+        return $this->hasOne(\App\Models\KelengkapanPendaftar::class, 'pendaftar_id');
     }
 
     // Accessors
